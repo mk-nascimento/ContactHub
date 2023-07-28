@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './users.entity';
 
+@Entity('contacts')
 export class Contact {
   @PrimaryGeneratedColumn('uuid')
   id: string;
