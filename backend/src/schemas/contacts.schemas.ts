@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { userResponse } from './users.schemas';
 
 export const contact = z.object({
   id: z.string().uuid(),
@@ -6,9 +7,9 @@ export const contact = z.object({
   email: z.string().email().max(45),
   cellphone: z.string().max(15),
   created_at: z.string(),
-  user_id: z.number(),
 });
 
-export const contactList = contact.array();
-export const contactPayload = contact.omit({ id: true, created_at: true, user_id: true });
-export const contactUpdate = contactPayload.pick({ full_name: true, email: true, cellphone: true });
+export const userContactList = contact.nullable().array();
+export const contactList = contact.extend({ user: userResponse.nullable() }).array();
+export const contactPayload = contact.omit({ id: true, created_at: true });
+export const contactPartialPayload = contactPayload.partial();

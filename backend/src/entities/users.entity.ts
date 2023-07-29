@@ -1,5 +1,6 @@
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { getRounds, hashSync } from 'bcryptjs';
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Contact } from './contacts.entity';
 
 enum UserRole {
   ADMIN = 'admin',
@@ -25,6 +26,9 @@ export class User {
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
+
+  @OneToMany(() => Contact, (contact) => contact.id)
+  contacts: Contact[];
 
   @BeforeInsert()
   @BeforeUpdate()

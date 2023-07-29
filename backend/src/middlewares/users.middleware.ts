@@ -14,11 +14,10 @@ import { TUserPayload } from '../interfaces/users.interface';
 export const isValidUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const userRepo: Repository<User> = AppDataSource.getRepository(User);
 
-  const id: string = req.params.id;
+  const id: string = res.locals.user_id;
 
   const userExists: boolean = await userRepo.exist({ where: { id } });
   if (!!!userExists) throw new AppError('User not found', StatusCodes.NOT_FOUND);
-  res.locals.user_id = id;
 
   next();
 };
@@ -29,11 +28,12 @@ export const isValidUser = async (req: Request, res: Response, next: NextFunctio
  */
 export const isValidUserEmail = async (req: Request, _: Response, next: NextFunction): Promise<void> => {
   const userRepo: Repository<User> = AppDataSource.getRepository(User);
+  const update: boolean = req.method === 'PATCH';
 
   const { email }: Pick<TUserPayload, 'email'> = req.body;
 
   const userExists: boolean = await userRepo.exist({ where: { email } });
-  if (email && userExists) throw new AppError('Email already exists', StatusCodes.CONFLICT);
+  if (email && userExists && !!!update) throw new AppError('Email already exists', StatusCodes.CONFLICT);
 
   next();
 };

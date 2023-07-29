@@ -16,8 +16,8 @@ export const isValidContact = async (req: Request, res: Response, next: NextFunc
   const id: string = req.params.id;
 
   const contactExists: boolean = await contactsRepo.exist({ where: { id } });
-  if (!!!contactExists) throw new AppError('User not found', StatusCodes.NOT_FOUND);
-  res.locals.user_id = id;
+  if (!!!contactExists) throw new AppError('Contact not found', StatusCodes.NOT_FOUND);
+  res.locals.paramsId = id;
 
   next();
 };

@@ -18,6 +18,6 @@ export class Contact {
   @CreateDateColumn({ type: 'date' })
   created_at: Date | string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.contacts, { onDelete: 'CASCADE' })
   user: User;
 }
