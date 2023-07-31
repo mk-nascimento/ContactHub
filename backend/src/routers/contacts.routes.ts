@@ -14,15 +14,16 @@ contactsRouter.post(
   cMid.isValidContactEmail,
   cCont.createContactsController
 );
-contactsRouter.get('', authMid.isTokenValid, authMid.isAdmin, cCont.listContactsController);
-contactsRouter.get('/:id', authMid.isTokenValid, cMid.isValidContact, cCont.retrieveContactController);
+contactsRouter.get('', authMid.isTokenValid, cCont.listContactsController);
+contactsRouter.get('/:id', authMid.isTokenValid, cMid.isValidContact, cMid.isContactOwnerOrAdmin, cCont.retrieveContactController);
 contactsRouter.patch(
   '/:id',
   authMid.isTokenValid,
-  serializer.default(cS.contactPartialPayload),
   cMid.isValidContact,
+  cMid.isContactOwnerOrAdmin,
+  serializer.default(cS.contactPartialPayload),
   cMid.isValidCellphone,
   cMid.isValidContactEmail,
   cCont.updateContactsController
 );
-contactsRouter.delete('/:id', cMid.isValidContact, cCont.deleteContactsController);
+contactsRouter.delete('/:id', authMid.isTokenValid, cMid.isValidContact, cCont.deleteContactsController);

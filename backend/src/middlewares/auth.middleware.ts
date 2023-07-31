@@ -42,21 +42,3 @@ export const isAdmin = async (req: Request, res: Response, next: NextFunction): 
 
   next();
 };
-
-export const isOwnerOrAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const usersRepo: Repository<User> = AppDataSource.getRepository(User);
-
-  const paramsId: string = req.params.id;
-  const user: User = (await usersRepo.findOneBy({ id: paramsId }))!;
-
-  const loggedId: string = res.locals.loggedId;
-  const loggedUser: User = (await usersRepo.findOneBy({ id: loggedId }))!;
-
-  const owner: boolean = loggedUser.id === user.id;
-  const admin: boolean = loggedUser.role === 'admin';
-
-  if (!!!owner && !!!admin) throw new AppError('Insufficient permission', StatusCodes.FORBIDDEN);
-  res.locals.user_id = paramsId;
-
-  next();
-};

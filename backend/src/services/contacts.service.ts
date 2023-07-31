@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { User } from '../entities';
 import { Contact } from '../entities/contacts.entity';
-import { TContact, TContactList, TContactPayload, TContactUpdatePayload } from '../interfaces/contacts.interface';
+import { TContact, TContactList, TContactPayload, TContactUpdatePayload, TUserContactList } from '../interfaces/contacts.interface';
 import { contactSchemas as cS } from '../schemas';
 
 export const createContactService = async (userId: string, contactPayload: TContactPayload): Promise<TContact> => {
@@ -12,7 +12,6 @@ export const createContactService = async (userId: string, contactPayload: TCont
 
   const id: string = userId;
   const user: User = (await userRepo.findOneBy({ id }))!;
-  console.log('passa aqui');
 
   const contactInstance: Contact = contactRepo.create({ ...contactPayload, user });
   await contactRepo.save(contactInstance);
@@ -22,8 +21,19 @@ export const createContactService = async (userId: string, contactPayload: TCont
   return contact;
 };
 
-export const listContactsService = async (): Promise<any> => {
+export const listContactsService = async (userId: string): Promise<TContactList | TUserContactList> => {
   const contactRepo: Repository<Contact> = AppDataSource.getRepository(Contact);
+  const userRepo: Repository<User> = AppDataSource.getRepository(User);
+
+  const { id, role }: User = (await userRepo.findOneBy({ id: userId }))!;
+  const admin: boolean = role === 'admin';
+
+  if (!!!admin) {
+    const contactsInstance: Contact[] = await contactRepo.find({ order: { full_name: 'ASC' }, where: { user: { id } } });
+    const contacts: TUserContactList = cS.userContactList.parse(contactsInstance);
+
+    return contacts;
+  }
 
   const contactsInstance: Contact[] = await contactRepo.find({ order: { full_name: 'ASC' }, relations: { user: true } });
   const contacts: TContactList = cS.contactList.parse(contactsInstance);

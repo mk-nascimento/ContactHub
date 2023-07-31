@@ -16,14 +16,14 @@ export const listUsersController = async (_: Request, res: Response): Promise<Re
 };
 
 export const retrieveUserController = async (req: Request, res: Response): Promise<Response> => {
-  const id: string = res.locals.user_id;
+  const id: string = res.locals.paramsId;
   const user: TUserResponse = await uServ.retrieveUserService(id);
 
   return res.json(user);
 };
 
 export const updateUserController = async (req: Request, res: Response): Promise<Response> => {
-  const id: string = res.locals.user_id;
+  const id: string = res.locals.paramsId;
 
   const user: TUserResponse = await uServ.updateUsersService(id, req.body);
 
@@ -31,7 +31,7 @@ export const updateUserController = async (req: Request, res: Response): Promise
 };
 
 export const deleteUserController = async (req: Request, res: Response): Promise<Response> => {
-  const id: string = res.locals.user_id;
+  const id: string = res.locals.paramsId;
 
   await uServ.deleteUserService(id);
 

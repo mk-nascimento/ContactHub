@@ -1,3 +1,4 @@
+import { isUUID } from 'class-validator';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Repository } from 'typeorm';
@@ -14,10 +15,13 @@ import { TUserPayload } from '../interfaces/users.interface';
 export const isValidUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const userRepo: Repository<User> = AppDataSource.getRepository(User);
 
-  const id: string = res.locals.user_id;
+  const id: string = req.params.id;
+  if (!isUUID(id)) throw new AppError('Invalid parameter: id is not a valid UUID');
 
   const userExists: boolean = await userRepo.exist({ where: { id } });
   if (!!!userExists) throw new AppError('User not found', StatusCodes.NOT_FOUND);
+
+  res.locals.paramsId = id;
 
   next();
 };
@@ -34,6 +38,21 @@ export const isValidUserEmail = async (req: Request, _: Response, next: NextFunc
 
   const userExists: boolean = await userRepo.exist({ where: { email } });
   if (email && userExists && !!!update) throw new AppError('Email already exists', StatusCodes.CONFLICT);
+
+  next();
+};
+
+export const isUserOwnerOrAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const userRepo: Repository<User> = AppDataSource.getRepository(User);
+
+  const id: string = res.locals.paramsId;
+  const loggedId: string = res.locals.loggedId;
+
+  const loggedUser: User = (await userRepo.findOneBy({ id: loggedId }))!;
+
+  const [admin, owner]: [boolean, boolean] = [loggedUser.role === 'admin', id === loggedId];
+
+  if (!!!owner && !!!admin) throw new AppError('Insufficient permission', StatusCodes.FORBIDDEN);
 
   next();
 };

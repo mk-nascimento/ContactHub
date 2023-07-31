@@ -9,7 +9,7 @@ export const contact = z.object({
   created_at: z.string(),
 });
 
-export const userContactList = contact.nullable().array();
+export const userContactList = contact.array();
 export const contactList = contact.extend({ user: userResponse.nullable() }).array();
 export const contactPayload = contact.omit({ id: true, created_at: true });
 export const contactPartialPayload = contactPayload.partial();
