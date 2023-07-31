@@ -3,12 +3,14 @@ import 'express-async-errors';
 import 'reflect-metadata';
 
 import express from 'express';
+import cors from 'cors';
 
 import { handleError } from './middlewares';
 import { authRouter, contactsRouter, usersRouter } from './routers';
 
 const app: express.Application = express();
 app.use(express.json());
+app.use(cors({ origin: 'http://localhost:5173' }));
 
 app.use('/login', authRouter);
 app.use('/contacts', contactsRouter);
