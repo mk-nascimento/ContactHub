@@ -50,7 +50,7 @@ Para executar a aplicação em ambiente local, siga os passos abaixo:
 - 1.2 Mude para a pasta da stack [backend/frontend] ```cd backend/``` ou ```cd frontend/```
 2. Instalar as dependências necessárias utilizando ```npm i```.
 3. Configurar as variáveis de ambiente, se necessário.[.env.example gerada para cada stack]
-4. Iniciar o servidor da aplicação utilizando o comando [npm run dev].
+4. Iniciar o servidor da aplicação utilizando o comando ```npm run dev```.
 5. Acessar a aplicação pelo navegador através da URL fornecida no terminal.
 
 ## Considerações Finais
