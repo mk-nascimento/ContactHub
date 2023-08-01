@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
-import './App.css';
 import App from './App.tsx';
 import { AuthProvider } from './Providers/Auth.provider.tsx';
 import { ContactsProvider } from './Providers/ContactProvider.tsx';
