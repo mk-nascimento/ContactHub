@@ -21,7 +21,7 @@ export const AuthContext = createContext({} as AuthContextsValues);
 
 export const AuthProvider = ({ children }: AuthProviderChildren) => {
   const navigate: NavigateFunction = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname }: Partial<Location> = useLocation();
   const token: string | null = localStorage.getItem('@fullstack-challenge:token');
 
   useEffect(() => {
@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }: AuthProviderChildren) => {
       localStorage.setItem('@fullstack-challenge:token', token);
 
       if (token) navigate('dashboard');
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
   };
 

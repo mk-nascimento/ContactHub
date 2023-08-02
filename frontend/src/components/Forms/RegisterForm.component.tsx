@@ -1,47 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { useNavigate } from 'react-router-dom';
-import { TRegisterData, registerSchema } from '../../schemas';
-import api from '../../services/axios';
+import { useUser } from '../../hooks/useUser';
+import { TUserData, userSchema } from '../../schemas';
 import { Button } from '../Button';
 import { Input } from './Input.component';
 
-interface RegisterResponse {
-  id: string;
-  name: string;
-  email: string;
-  created_at: Date;
-  role: 'client' | 'admin';
-}
-
 export const RegisterForm = () => {
+  const { registerUser } = useUser();
+
   const {
     formState: { errors },
     handleSubmit,
     register,
-  } = useForm<TRegisterData>({ resolver: zodResolver(registerSchema) });
-
-  const navigate = useNavigate();
-
-  const registerUser = async (data: TRegisterData) => {
-    try {
-      const response = await api.post<RegisterResponse>('users/', data);
-      const { id } = response.data;
-      if (id) {
-        const loginResponse = await api.post<{ token: string }>('login/', data);
-
-        const { token } = loginResponse.data;
-
-        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-        localStorage.setItem('@fullstack-challenge:token', token);
-
-        navigate('dashboard');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  } = useForm<TUserData>({ resolver: zodResolver(userSchema) });
 
   return (
     <form

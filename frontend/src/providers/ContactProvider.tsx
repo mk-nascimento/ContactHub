@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Contact, ContactData } from '../interfaces/global.interfaces';
 import { TContactPayload } from '../schemas';
 import api from '../services/axios';
@@ -22,29 +22,26 @@ export const ContactContext = createContext({} as ContactContextValues);
 export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
   const [selectedContact, setSelectedContact] = useState<ContactData>({} as ContactData);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
-
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const navigate = useNavigate();
+  const token: string | null = localStorage.getItem('@fullstack-challenge:token');
+
   useEffect(() => {
     (async () => {
-      const token: string | null = localStorage.getItem('@fullstack-challenge:token');
+      if (!token) navigate('/');
 
-      if (token) {
-        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-        const response = await api.get<Contact[]>('contacts/');
-        setContacts(response.data);
-      }
-      <Navigate to="/" />;
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      const response = await api.get<Contact[]>('contacts/');
+      setContacts(response.data);
     })();
-  }, []);
+  }, [navigate, token]);
 
   const updateContact = async (contactDataPayload: TContactPayload): Promise<void> => {
     try {
-      const { data } = await api.patch<Contact>(`contacts/${selectedContact.id}`, contactDataPayload);
-      if (data.id) {
-        contacts.map((cont) => {
-          if (cont.id === data.id) return data;
-          return cont;
-        });
+      const { data, status } = await api.patch<Contact>(`contacts/${selectedContact.id}`, contactDataPayload);
+      if (status === 200) {
+        setIsOpenModal(false);
+        setContacts((prev) => prev.map((cont) => (cont.id === data.id ? data : cont)));
       }
     } catch (error) {
       console.error(error);

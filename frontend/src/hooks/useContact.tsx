@@ -1,4 +1,4 @@
 import { useContext } from 'react';
-import { ContactContext } from '../Providers/ContactProvider';
+import { ContactContext } from '../providers/ContactProvider';
 
 export const useContact = () => useContext(ContactContext);
