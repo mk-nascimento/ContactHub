@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { User } from '../entities';
-import { TUserListResponse, TUserPayload, TUserResponse } from '../interfaces/users.interface';
+import { TUserListResponse, TUserPayload, TUserResponse, TUserUpdatePayload } from '../interfaces/users.interface';
 import { userSchemas as uS } from '../schemas';
 
 export const createUserService = async (userPayload: TUserPayload): Promise<TUserResponse> => {
@@ -35,7 +35,7 @@ export const retrieveUserService = async (userId: string): Promise<TUserResponse
   return user;
 };
 
-export const updateUsersService = async (userId: string, userPayload: TUserPayload): Promise<TUserResponse> => {
+export const updateUsersService = async (userId: string, userPayload: TUserUpdatePayload): Promise<TUserResponse> => {
   const userRepo: Repository<User> = AppDataSource.getRepository(User);
 
   const id: string = userId;
