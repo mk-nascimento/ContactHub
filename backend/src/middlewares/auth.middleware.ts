@@ -30,6 +30,13 @@ export const isTokenValid = async (req: Request, res: Response, next: NextFuncti
   next();
 };
 
+/**
+ * Middleware to check if the user making the request is an admin.
+ * It fetches the user based on the 'loggedId' stored in 'res.locals' and checks their role.
+ * If the user is an admin, it sets the 'userRole' property in 'res.locals'.
+ *
+ * @throws {AppError} - Throws an error with status 403 if the user is not an admin.
+ */
 export const isAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const usersRepo: Repository<User> = AppDataSource.getRepository(User);
 
