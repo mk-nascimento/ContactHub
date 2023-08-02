@@ -7,13 +7,13 @@ import { Button } from '../Button';
 import { Input } from './Input.component';
 
 export const ContactForm = () => {
+  const { updateContact, selectedContact } = useContact();
+
   const {
     formState: { errors },
     handleSubmit,
     register,
   } = useForm<TContactPayload>({ resolver: zodResolver(contactSchema) });
-
-  const { updateContact, selectedContact } = useContact();
 
   return (
     <form
