@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { TUserListResponse, TUserResponse } from '../interfaces/users.interface';
+import { TUserListResponse, TUserProfile, TUserResponse } from '../interfaces/users.interface';
 import { usersServices as uServ } from '../services';
 
 export const createUserController = async (req: Request, res: Response): Promise<Response> => {
@@ -15,9 +15,16 @@ export const listUsersController = async (_: Request, res: Response): Promise<Re
   return res.json(users);
 };
 
-export const retrieveUserController = async (req: Request, res: Response): Promise<Response> => {
+export const retrieveUserController = async (_: Request, res: Response): Promise<Response> => {
   const id: string = res.locals.paramsId;
   const user: TUserResponse = await uServ.retrieveUserService(id);
+
+  return res.json(user);
+};
+
+export const retrieveProfileController = async (_: Request, res: Response): Promise<Response> => {
+  const id: string = res.locals.loggedId;
+  const user: TUserProfile = await uServ.retrieveProfileService(id);
 
   return res.json(user);
 };

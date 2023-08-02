@@ -13,7 +13,7 @@ export class User {
   id: string;
 
   @Column({ type: 'varchar', length: 50 })
-  name: string;
+  full_name: string;
 
   @Column({ type: 'varchar', length: 45, unique: true })
   email: string;
@@ -27,7 +27,7 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @OneToMany(() => Contact, (contact) => contact.id)
+  @OneToMany(() => Contact, (contact) => contact.id, { nullable: true })
   contacts: Contact[];
 
   @BeforeInsert()

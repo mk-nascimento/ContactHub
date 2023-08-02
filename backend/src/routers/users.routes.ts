@@ -8,7 +8,7 @@ export const usersRouter: Router = Router();
 
 usersRouter.post('', serializer.default(uS.userPayload), uMid.isValidUserEmail, uCont.createUserController);
 usersRouter.get('', authMid.isTokenValid, authMid.isAdmin, uCont.listUsersController);
-usersRouter.get('/:id', authMid.isTokenValid, uMid.isValidUser, uMid.isUserOwnerOrAdmin, uCont.retrieveUserController);
+usersRouter.get('/:id', authMid.isTokenValid, authMid.isAdmin, uMid.isValidUser, uCont.retrieveUserController);
 usersRouter.patch(
   '/:id',
   authMid.isTokenValid,
@@ -16,6 +16,6 @@ usersRouter.patch(
   uMid.isUserOwnerOrAdmin,
   serializer.default(uS.userPartialUpdate),
   uMid.isValidUserEmail,
-  uCont.updateUserController
+  uCont.updateUserController,
 );
 usersRouter.delete('/:id', uMid.isValidUser, uMid.isUserOwnerOrAdmin, uCont.deleteUserController);
