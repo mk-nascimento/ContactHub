@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: AuthProviderChildren) => {
 
     (async () => {
       try {
-        await api.get('validate/');
+        await api.get('auth/validate/');
       } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 401 && pathname !== '/') navigate('/');
       }
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: AuthProviderChildren) => {
 
   const login = async (data: TLoginData): Promise<void> => {
     try {
-      const response = await api.post<LoginResponse>('login/', data);
+      const response = await api.post<LoginResponse>('auth/login/', data);
 
       const { token } = response.data;
 
