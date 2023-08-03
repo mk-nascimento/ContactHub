@@ -18,12 +18,13 @@ export default {
         black: '#000000',
       },
       fontFamily: {
-        sans: ['Fira Code', 'sans-serif'],
+        sans: ['Ubuntu', 'sans-serif'],
       },
       cursor: {
         pointer: 'pointer',
       },
     },
   },
+  variants: { scrollbar: ['rounded'] },
   plugins: [],
 };

@@ -3,20 +3,26 @@ import { createPortal } from 'react-dom';
 import { IoClose } from 'react-icons/io5';
 
 import { useContact } from '../../hooks/useContact';
+import { useUser } from '../../hooks/useUser';
 
 interface Props {
   children?: React.ReactNode;
 }
 
 export const CustomModal = ({ children }: Props) => {
-  const { isOpenModal: openContact, setIsOpenModal: setOpenContact } = useContact();
+  const { isOpenModal: editContact, setIsOpenModal: setEditContact } = useContact();
+  const { isOpenModal: editProfile, setIsOpenModal: setEditProfile, deleteProfileModal, setDeleteProfileModal } = useUser();
+
   const ref = useRef<HTMLDivElement>(null);
+  const open: boolean = editContact || editProfile || deleteProfileModal;
+
+  const closeModal = () => (setEditContact(false), setEditProfile(false), setDeleteProfileModal(false));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!ref.current || !event.target) return;
 
-      if (!(event.target instanceof Node) || !ref.current.contains(event.target)) setOpenContact(false);
+      if (!(event.target instanceof Node) || !ref.current.contains(event.target)) closeModal();
     };
 
     window.addEventListener('mousedown', handleClickOutside);
@@ -24,21 +30,16 @@ export const CustomModal = ({ children }: Props) => {
     return () => {
       window.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [setOpenContact]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return createPortal(
     <>
-      {openContact && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 bg-gray-900 transition-opacity">
-          <div
-            ref={ref}
-            className="modal-content p-0 rounded-lg shadow-lg animate-fade-in"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-          >
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-80 bg-gray-900 transition-opacity">
+          <div ref={ref} className="relative p-0 rounded-lg shadow-lg animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <button
-              onClick={() => setOpenContact(false)}
+              onClick={closeModal}
               className="absolute top-4 right-4 text-xl text-gray-50 hover:text-pink-500 transition-colors duration-500 animate-pulse"
             >
               <IoClose />

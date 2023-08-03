@@ -1,6 +1,12 @@
 import { AxiosError } from 'axios';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { createContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { Contact } from '../interfaces/global.interfaces';
 import { TUserData } from '../schemas';
 import api from '../services/axios';
@@ -9,8 +15,13 @@ interface UserContextValues {
   getProfile: () => Promise<void>;
   registerUser: (data: TUserData) => Promise<void>;
   updateUser: (data: TUserData) => void;
+  deleteUser: () => Promise<void>;
   isOpenModal: boolean;
   setIsOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  profile: UserProfile | undefined;
+  exportProfile: (data: UserProfile) => void;
+  deleteProfileModal: boolean;
+  setDeleteProfileModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface UserProviderProps {
@@ -19,7 +30,7 @@ interface UserProviderProps {
 
 interface UserResponse {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
   created_at: Date;
   role: 'client' | 'admin';
@@ -34,6 +45,7 @@ export const UserContext = createContext({} as UserContextValues);
 export const UserProvider = ({ children }: UserProviderProps) => {
   const navigate = useNavigate();
   const { pathname }: Partial<Location> = useLocation();
+  const [deleteProfileModal, setDeleteProfileModal] = useState<boolean>(false);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [profile, setProfile] = useState<UserProfile>();
   const token: string | null = localStorage.getItem('@fullstack-challenge:token');
@@ -42,21 +54,24 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     if (!token) navigate('/');
     api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
-    (async () => {
+    const validate = async () => {
       try {
         await api.get('auth/validate/');
       } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 401 && pathname !== '/') navigate('/');
       }
-    })();
-  }, [navigate, pathname, token]);
+    };
+    if (api.defaults.headers.common.Authorization) validate();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const getProfile = async () => {
     try {
       const { data, status } = await api.get<UserProfile>('profile/');
       if (status === 200) setProfile((prev) => (prev !== data ? data : profile));
     } catch (error) {
-      console.error(error);
+      if (error instanceof AxiosError) navigate('/dashboard');
     }
   };
 
@@ -88,6 +103,59 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   };
 
-  const values = { getProfile, registerUser, updateUser, isOpenModal, setIsOpenModal };
+  const deleteUser = async () => {
+    try {
+      await api.delete(`users/${profile?.id}`);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const exportProfile = (data: UserProfile) => {
+    const def: TDocumentDefinitions = {
+      content: [
+        { text: 'Informações de usuário', style: 'header' },
+        { text: `ID: ${data.id}` },
+        { text: `Name: ${data.full_name}` },
+        { text: `Email: ${data.email}` },
+        { text: `Created At: ${data.created_at}` },
+        { text: 'Contatos', style: 'subheader' },
+        data.contacts?.map((contact) => [
+          { text: `ID: ${contact.id}` },
+          { text: `Full Name: ${contact.full_name}` },
+          { text: `Email: ${contact.email}` },
+          { text: `Cellphone: ${contact.cellphone}` },
+          { text: `Created At: ${contact.created_at}` },
+          { text: '' },
+        ]),
+      ],
+      styles: {
+        header: {
+          fontSize: 20,
+          bold: true,
+          margin: [0, 0, 0, 10],
+        },
+        subheader: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 10, 0, 5],
+        },
+      },
+    };
+    pdfMake.createPdf(def).download('export_profile.pdf');
+  };
+
+  const values = {
+    getProfile,
+    registerUser,
+    updateUser,
+    deleteUser,
+    isOpenModal,
+    setIsOpenModal,
+    profile,
+    exportProfile,
+    deleteProfileModal,
+    setDeleteProfileModal,
+  };
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
 };

@@ -23,7 +23,7 @@ export const RegisterForm = () => {
       <h2 className="text-2xl font-bold mb-4">Cadastro</h2>
 
       <div className="grid gap-[22px]">
-        <Input error={errors.name} id="name" placeholder="name" register={register('name')} type="text" />
+        <Input error={errors.full_name} id="name" placeholder="Nome Completo" register={register('full_name')} type="text" />
         <Input error={errors.email} id="email" placeholder="Email" register={register('email')} type="email" />
         <Input error={errors.password} id="password" placeholder="Password" register={register('password')} type="password" />
         <Input error={errors.confirm} id="confirm" placeholder="Confirme a senha" register={register('confirm')} type="password" />

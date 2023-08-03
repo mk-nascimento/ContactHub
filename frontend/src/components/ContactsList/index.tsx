@@ -6,8 +6,8 @@ interface Props {
 
 export const ContactList = ({ children }: Props) => {
   return (
-    <ul className="bg-gray-900 rounded-[8px] px-[28px] py-[20px] flex flex-col gap-[18px] border-[1px] border-gray-700 md:w-[600px] lg:w-[720px]">
-      <h2 className="text-center font-semibold">Contatos</h2>
+    <ul className="w-[300px] md:w-full bg-gray-900 rounded-md p-[20px] flex flex-col gap-y-4 border border-gray-600 max-h-[500px] overflow-y-auto">
+      <h2 className="font-bold text-center text-xl mb-4">Contatos</h2>
       {children}
     </ul>
   );

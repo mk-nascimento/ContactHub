@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import { AuthProvider } from './providers/Auth.provider.tsx';
 import { ContactsProvider } from './providers/ContactProvider.tsx';
+import { UserProvider } from './providers/User.provider.tsx';
 import './styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <ContactsProvider>
-          <App />
+          <UserProvider>
+            <App />
+          </UserProvider>
         </ContactsProvider>
       </AuthProvider>
     </BrowserRouter>

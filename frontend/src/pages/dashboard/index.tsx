@@ -23,7 +23,7 @@ export const Dashboard = () => {
   return (
     <>
       <Navbar />
-      <MainContainer>
+      <MainContainer addClass="md:w-[600px] lg:w-[720px] justify-center md:mt-28 mt-44">
         <ContactList>{renderContacts(contacts)}</ContactList>
         <CustomModal>{selectedContact ? <ContactForm /> : <></>}</CustomModal>
       </MainContainer>
