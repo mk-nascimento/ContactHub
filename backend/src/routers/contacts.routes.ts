@@ -10,9 +10,10 @@ contactsRouter.post(
   '',
   authMid.isTokenValid,
   serializer.default(cS.contactPayload),
+  cMid.isValidContactFullname,
   cMid.isValidCellphone,
   cMid.isValidContactEmail,
-  cCont.createContactsController
+  cCont.createContactsController,
 );
 contactsRouter.get('', authMid.isTokenValid, cCont.listContactsController);
 contactsRouter.get('/:id', authMid.isTokenValid, cMid.isValidContact, cMid.isContactOwnerOrAdmin, cCont.retrieveContactController);
@@ -22,8 +23,9 @@ contactsRouter.patch(
   cMid.isValidContact,
   cMid.isContactOwnerOrAdmin,
   serializer.default(cS.contactPartialPayload),
+  cMid.isValidContactFullname,
   cMid.isValidCellphone,
   cMid.isValidContactEmail,
-  cCont.updateContactsController
+  cCont.updateContactsController,
 );
 contactsRouter.delete('/:id', authMid.isTokenValid, cMid.isValidContact, cCont.deleteContactsController);
