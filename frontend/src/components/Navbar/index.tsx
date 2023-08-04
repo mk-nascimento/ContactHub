@@ -1,11 +1,13 @@
 import { IoExit } from 'react-icons/io5';
-
 import { Link, useLocation } from 'react-router-dom';
+
 import logo from '../../assets/logo.svg';
+import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../Button';
 
 export const Navbar = () => {
   const { pathname }: Partial<Location> = useLocation();
+  const { logout } = useAuth();
   const linkClass: string = 'font-semibold text-lg hover:underline hover:text-pink-500 transition-colors duration-500 cursor-pointer';
 
   return (
@@ -23,7 +25,7 @@ export const Navbar = () => {
               Perfil
             </Link>
           )}
-          <Button type="button" addClass="text-xl">
+          <Button type="button" addClass="text-xl" onClickButton={logout}>
             <IoExit />
           </Button>
         </div>

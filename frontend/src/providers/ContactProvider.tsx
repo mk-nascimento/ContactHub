@@ -37,8 +37,6 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
 
   useEffect(() => {
     (async () => {
-      if (!token) navigate('/');
-
       api.defaults.headers.common.Authorization = `Bearer ${token}`;
       const response = await api.get<Contact[]>('contacts/');
       setContacts(response.data);
@@ -49,7 +47,7 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     try {
       const { data, status } = await api.post<Contact>(`contacts/`, contactDataPayload);
       if (status === 201) {
-        setIsOpenModal(false);
+        setAddContactModal(false);
         setContacts([...contacts, data]);
       }
     } catch (error) {

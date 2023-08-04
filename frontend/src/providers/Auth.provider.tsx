@@ -25,14 +25,13 @@ export const AuthProvider = ({ children }: AuthProviderChildren) => {
   const token: string | null = localStorage.getItem('@fullstack-challenge:token');
 
   useEffect(() => {
-    if (!token) navigate('/');
-    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
     (async () => {
       try {
         await api.get('auth/validate/');
       } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401 && pathname !== '/') navigate('/');
+        if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
       }
     })();
   }, [navigate, pathname, token]);
@@ -52,7 +51,7 @@ export const AuthProvider = ({ children }: AuthProviderChildren) => {
     }
   };
 
-  const logout = async () => console.log('logout');
+  const logout = async () => (localStorage.clear(), navigate('/'));
 
   const values = { login, logout };
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;

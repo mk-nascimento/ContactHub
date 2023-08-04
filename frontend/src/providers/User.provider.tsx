@@ -51,14 +51,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const token: string | null = localStorage.getItem('@fullstack-challenge:token');
 
   useEffect(() => {
-    if (!token) navigate('/');
-    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
     const validate = async () => {
       try {
         await api.get('auth/validate/');
       } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401 && pathname !== '/') navigate('/');
+        if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
       }
     };
     if (api.defaults.headers.common.Authorization) validate();
