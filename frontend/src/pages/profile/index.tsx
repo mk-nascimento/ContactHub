@@ -45,11 +45,11 @@ export const Profile = () => {
     <>
       <Navbar />
       <div className="md:mt-28 mt-36 w-full flex flex-col items-center gap-6">
-        <header className="relative w-[300px] md:w-[600px] lg:w-[720px] px-4 py-5 bg-gray-900 rounded-md border border-gray-600">
+        <header className="relative container px-4 py-5 bg-gray-900 rounded-md border border-gray-600">
           <h2 className="font-bold text-center text-xl mb-4">Informações de perfil</h2>
           <button
             onClick={() => exportProfile(profile!)}
-            className="absolute top-6 right-4 text-xl text-gray-50 hover:text-pink-500 transition-colors duration-500 animate-pulse"
+            className="absolute p-2 top-4 right-4 text-xl bg-gray-700 hover:bg-gray-100 rounded-md text-gray-50 hover:text-pink-500 transition-colors duration-500 animate-pulse"
           >
             <BiExport />
           </button>
@@ -71,28 +71,22 @@ export const Profile = () => {
             </div>
 
             <div id="profile-options" className="flex gap-4 justify-around md:w-fit md:ml-auto md:flex-col md:justify-between">
-              <button
-                className="w-fit p-2 rounded-md cursor-pointer transition-colors duration-500 hover:scale-1 hover:bg-pink-500"
-                onClick={() => setEditModal(true)}
-              >
+              <button className="icon-button" onClick={() => setEditModal(true)}>
                 <FaEdit />
               </button>
 
-              <button
-                className="w-fit p-2 rounded-md cursor-pointer transition-colors duration-500 hover:scale-1 hover:bg-pink-500"
-                onClick={() => setDeleteProfileModal(true)}
-              >
+              <button className="icon-button" onClick={() => setDeleteProfileModal(true)}>
                 <FaTrashAlt />
               </button>
             </div>
           </div>
         </header>
 
-        <MainContainer addClass="w-[300px] md:w-[600px] lg:w-[720px] rounded-md">
+        <MainContainer addClass="container rounded-md">
           {contacts?.length ? (
-            <ContactList>{renderContacts(contacts)}</ContactList>
+            <ContactList viewMode>{renderContacts(contacts)}</ContactList>
           ) : (
-            <div className="w-full bg-gray-900 rounded-md p-[20px] flex flex-col gap-y-4 border border-gray-600">
+            <div className="w-full max-md:w-[300px] bg-gray-900 rounded-md p-[20px] flex flex-col gap-y-4 border border-gray-600 relative">
               <h2 className="font-bold text-center text-xl mb-4">Contatos</h2>
               <small className="text-center">Sua lista de contatos está vazia</small>
             </div>

@@ -10,13 +10,22 @@ interface Props {
 }
 
 export const CustomModal = ({ children }: Props) => {
-  const { isOpenModal: editContact, setIsOpenModal: setEditContact } = useContact();
+  const {
+    isOpenModal: editContact,
+    setIsOpenModal: setEditContact,
+    deleteContactModal,
+    setDeleteContactModal,
+    addContactModal,
+    setAddContactModal,
+  } = useContact();
   const { isOpenModal: editProfile, setIsOpenModal: setEditProfile, deleteProfileModal, setDeleteProfileModal } = useUser();
 
   const ref = useRef<HTMLDivElement>(null);
-  const open: boolean = editContact || editProfile || deleteProfileModal;
+  const open: boolean = addContactModal || deleteProfileModal || deleteContactModal || editContact || editProfile;
 
-  const closeModal = () => (setEditContact(false), setEditProfile(false), setDeleteProfileModal(false));
+  const closeModal = () => (
+    setAddContactModal(false), setDeleteProfileModal(false), setDeleteContactModal(false), setEditContact(false), setEditProfile(false)
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

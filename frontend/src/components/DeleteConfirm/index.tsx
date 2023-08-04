@@ -1,3 +1,4 @@
+import { useContact } from '../../hooks/useContact';
 import { useUser } from '../../hooks/useUser';
 
 interface Props {
@@ -5,6 +6,7 @@ interface Props {
 }
 
 export const DeleteConfirm = ({ deleteType }: Props) => {
+  const { deleteContact } = useContact();
   const { setDeleteProfileModal, deleteUser } = useUser();
 
   const titleClass: string = 'font-semibold text-center text-lg';
@@ -13,7 +15,7 @@ export const DeleteConfirm = ({ deleteType }: Props) => {
   const confirmDelete = async () => {
     if (deleteType == 'contact')
       try {
-        console.log('deletar contato');
+        await deleteContact();
       } catch (error) {
         console.error(error);
       }

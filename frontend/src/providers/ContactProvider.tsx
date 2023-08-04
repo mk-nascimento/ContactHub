@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { Contact, ContactData } from '../interfaces/global.interfaces';
 import { TContactPayload } from '../schemas';
 import api from '../services/axios';
@@ -8,9 +9,15 @@ interface ContactContextValues {
   contacts: Contact[];
   isOpenModal: boolean;
   setIsOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  deleteContactModal: boolean;
+  setDeleteContactModal: React.Dispatch<React.SetStateAction<boolean>>;
+  addContactModal: boolean;
+  setAddContactModal: React.Dispatch<React.SetStateAction<boolean>>;
   selectedContact: ContactData;
   setSelectedContact: React.Dispatch<React.SetStateAction<ContactData>>;
+  addContact: (contactDataPayload: TContactPayload) => Promise<void>;
   updateContact: (data: TContactPayload) => Promise<void>;
+  deleteContact: () => Promise<void>;
 }
 
 export interface ContactsProviderChildren {
@@ -20,9 +27,11 @@ export interface ContactsProviderChildren {
 export const ContactContext = createContext({} as ContactContextValues);
 
 export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
-  const [selectedContact, setSelectedContact] = useState<ContactData>({} as ContactData);
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [addContactModal, setAddContactModal] = useState<boolean>(false);
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const [deleteContactModal, setDeleteContactModal] = useState<boolean>(false);
+  const [selectedContact, setSelectedContact] = useState<ContactData>({} as ContactData);
   const navigate = useNavigate();
   const token: string | null = localStorage.getItem('@fullstack-challenge:token');
 
@@ -36,6 +45,18 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     })();
   }, [navigate, token]);
 
+  const addContact = async (contactDataPayload: TContactPayload): Promise<void> => {
+    try {
+      const { data, status } = await api.post<Contact>(`contacts/`, contactDataPayload);
+      if (status === 201) {
+        setIsOpenModal(false);
+        setContacts([...contacts, data]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const updateContact = async (contactDataPayload: TContactPayload): Promise<void> => {
     try {
       const { data, status } = await api.patch<Contact>(`contacts/${selectedContact.id}`, contactDataPayload);
@@ -48,6 +69,31 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     }
   };
 
-  const values = { contacts, isOpenModal, setIsOpenModal, selectedContact, setSelectedContact, updateContact };
+  const deleteContact = async (): Promise<void> => {
+    try {
+      const { status } = await api.delete(`contacts/${selectedContact.id}`);
+      if (status === 204) {
+        setDeleteContactModal(false);
+        setContacts((prev) => prev.filter((cont) => cont.id !== selectedContact.id));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const values = {
+    contacts,
+    isOpenModal,
+    setIsOpenModal,
+    selectedContact,
+    setSelectedContact,
+    addContact,
+    updateContact,
+    deleteContact,
+    deleteContactModal,
+    setDeleteContactModal,
+    addContactModal,
+    setAddContactModal,
+  };
   return <ContactContext.Provider value={values}>{children}</ContactContext.Provider>;
 };

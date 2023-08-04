@@ -15,11 +15,8 @@ export const ProfileForm = () => {
   } = useForm<TUserData>({ resolver: zodResolver(userSchema) });
 
   return (
-    <form
-      onSubmit={handleSubmit(() => console.log('Profile Form'))}
-      className="transition-all duration-300 ease-in-out flex flex-col items-center justify-center shadow-md bg-gray-900 rounded-lg px-[22px] py-[42px] gap-[24px]"
-    >
-      <h2 className="text-2xl font-bold mb-4 text-gray-50">Informações de perfil</h2>
+    <form onSubmit={handleSubmit(() => console.log('Profile Form'))} className="form">
+      <h2 className="text-2xl font-bold mb-4 text-gray-50 text-center">Informações de perfil</h2>
 
       <div className="grid gap-[22px]">
         <Input

@@ -16,11 +16,8 @@ export const LoginForm = () => {
   const { login } = useAuth();
 
   return (
-    <form
-      onSubmit={handleSubmit(login)}
-      className="flex flex-col items-center justify-center shadow-md bg-gray-900 rounded-lg px-[22px] py-[42px] gap-[24px]"
-    >
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <form onSubmit={handleSubmit(login)} className="form">
+      <h2 className="text-2xl font-bold mb-4 text-gray-50 text-center">Login</h2>
 
       <div className="grid gap-[22px]">
         <Input error={errors.email} id="email" placeholder="Email" register={register('email')} type="email" />

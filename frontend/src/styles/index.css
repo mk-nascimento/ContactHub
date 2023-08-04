@@ -5,3 +5,17 @@ body {
   color: #F1F3F5
 }
 
+@layer components {
+  .form {
+    @apply transition-all duration-300 ease-in-out flex flex-col items-center justify-center shadow-md bg-gray-900 rounded-lg px-[22px] py-[42px] gap-[24px]
+  }
+  .container {
+    @apply w-[300px] md:w-[600px] lg:w-[720px]
+  }
+  .desk-container {
+    @apply md:w-[600px] lg:w-[720px]
+  }
+  .icon-button {
+    @apply w-fit p-2 rounded-md cursor-pointer transition-colors duration-500 hover:scale-110 hover:bg-pink-500
+  }
+}
