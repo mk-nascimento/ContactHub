@@ -10,7 +10,7 @@ import { ZodTypeAny } from 'zod';
  * @returns {Function} - The body serializer middleware function.
  */
 const bodySerializer =
-  (schema: ZodTypeAny): Function =>
+  (schema: ZodTypeAny) =>
   (req: Request, _res: Response, next: NextFunction): void => {
     req.body = schema.parse(req.body);
 
