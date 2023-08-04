@@ -36,21 +36,48 @@ A aplicação web deverá conter as seguintes funcionalidades:
 
 O projeto será desenvolvido utilizando as seguintes tecnologias:
 
-- Linguagem de Programação: [Typescript]
-- Framework Web: [Front: React, Back: Node/Express]
-- Banco de Dados: [PostgreSQL]
-- Ferramentas de Estilização: [Tailwindcss]
+- Linguagem de Programação: [Typescript](https://www.typescriptlang.org/)
+- Framework Web: [Front: React](https://react.dev/) <=> [Back: Node/Express](https://expressjs.com/pt-br/)
+- Banco de Dados: [PostgreSQL](https://www.postgresql.org/)
+- Ferramentas de Estilização: [Tailwindcss](https://tailwindcss.com/)
 - Outras bibliotecas e ferramentas serão adicionadas conforme a necessidade do desenvolvimento.
 
 ## Instruções de Execução
 
 Para executar a aplicação em ambiente local, siga os passos abaixo:
 
-1. Clonar o repositório do projeto do GitHub: [https://github.com/mk-nascimento/fullstack-challenge]
-- 1.2 Mude para a pasta da stack [backend/frontend] ```cd backend/``` ou ```cd frontend/```
-2. Instalar as dependências necessárias utilizando ```npm i```.
-3. Configurar as variáveis de ambiente, se necessário.[.env.example gerada para cada stack]
-4. Iniciar o servidor da aplicação utilizando o comando ```npm run dev```.
+1. Clonar o repositório do projeto do GitHub: [Repositório](https://github.com/mk-nascimento/fullstack-challenge)
+  - 1.1 Mude para a pasta da stack [backend/frontend]:
+      ```bash
+      cd backend/
+      # or 
+      cd frontend/
+      ```
+2. Instalar as dependências necessárias utilizando:
+    ```bash 
+    npm i
+    # or
+    yarn i
+    # or
+    pnpm i
+    ```
+  - 2.1 Migre as tabelas para o database
+    ```bash
+    npm migrate
+    # or
+    yarn migrate
+    # or
+    pnpm migrate
+    ```
+3. Configurar as variáveis de ambiente, se necessário. ```.env.example``` no projeto.
+4. Iniciar o servidor da aplicação utilizando o comando:
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    # or
+    pnpm dev
+    ```
 5. Acessar a aplicação pelo navegador através da URL fornecida no terminal.
 
 ## Considerações Finais
