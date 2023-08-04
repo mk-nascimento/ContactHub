@@ -14,7 +14,7 @@ export const Navbar = () => {
         <img src={logo} alt="fullstack-challenge logo" className="h-[24px] hover:animate-pulse cursor-none" />
 
         <div className="flex flex-row flex-wrap items-center gap-x-6 gap-y-3">
-          {pathname == '/profile' ? (
+          {pathname === '/profile' ? (
             <Link className={linkClass} to="/dashboard">
               Dashboard
             </Link>
