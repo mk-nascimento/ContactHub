@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
+import { Link } from 'react-router-dom';
 import { useUser } from '../../hooks/useUser';
 import { TUserData, userSchema } from '../../schemas';
 import { Button } from '../Button';
@@ -17,6 +18,9 @@ export const RegisterForm = () => {
 
   return (
     <form onSubmit={handleSubmit(registerUser)} className="form">
+      <Link to="/" className="absolute top-6 left-6 font-semibold hover:underline hover:text-pink-500 transition-colors duration-500 cursor-pointer">
+        {'<'} Login
+      </Link>
       <h2 className="text-2xl font-bold mb-4 text-gray-50 text-center">Cadastro</h2>
 
       <div className="grid gap-[22px]">
