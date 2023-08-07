@@ -63,7 +63,7 @@ Para executar a aplicação em ambiente local, siga os passos abaixo:
     ```
   - 2.1 Migre as tabelas para o database
     ```bash
-    npm migrate
+    npm run migrate
     # or
     yarn migrate
     # or
