@@ -4,8 +4,8 @@ import { Contact } from '../entities/contact.entity';
 
 export abstract class ContactsRepository {
   abstract create(data: CreateContactDto): Promise<Contact>;
-  abstract find(): Promise<Contact[]>;
-  abstract findOne(id: string): Promise<Contact | undefined>;
+  abstract findMany(): Promise<Contact[]>;
+  abstract findUnique(id: string): Promise<Contact | undefined>;
   abstract update(id: string, data: UpdateContactDto): Promise<Contact>;
-  abstract delete(id: string): Promise<void>;
+  abstract remove(id: string): Promise<void>;
 }

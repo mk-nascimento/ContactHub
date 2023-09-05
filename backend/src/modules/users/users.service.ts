@@ -1,30 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { UsersRepository } from './repositories/users.repository';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private usersRepo: UsersRepository) {}
+
+  async create(createUserDto: CreateUserDto) {
+    return await this.usersRepo.create(createUserDto);
   }
 
-  findMany() {
-    return `This action returns all users`;
+  async findMany() {
+    return await this.usersRepo.findMany();
   }
 
-  findUnique(id: string) {
-    return `This action returns a #${id} user`;
+  async findUnique(id: string) {
+    const user: User = await this.usersRepo.findUnique(id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+
+    return user;
   }
 
-  findUniqueByEmail(email: string) {
-    return `This action returns a @${email} user`;
+  async findUniqueByEmail(email: string) {
+    const user: User = await this.usersRepo.findUniqueByEmail(email);
+    if (!user) throw new NotFoundException(`User @${email} not found`);
+
+    return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user: User = await this.usersRepo.findUnique(id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+
+    return await this.usersRepo.update(id, updateUserDto);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user: User = await this.usersRepo.findUnique(id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+
+    return await this.usersRepo.remove(id);
   }
 }
