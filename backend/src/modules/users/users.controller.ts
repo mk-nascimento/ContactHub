@@ -34,28 +34,28 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findMany(@Request() req: IReqWithUser) {
-    return this.usersService.findMany(req.user);
+    return this.usersService.findMany(req.user.role);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findUnique(@Param('id', ParseUUIDPipe) id: string, @Request() req: IReqWithUser) {
-    return this.usersService.findUnique(req.user, id);
+  findUnique(@Param('id', ParseUUIDPipe) id: string, @Request() { user }: IReqWithUser) {
+    return this.usersService.findUnique(user, id);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto, @Request() req: IReqWithUser) {
-    return this.usersService.update(req.user, id, updateUserDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto, @Request() { user }: IReqWithUser) {
+    return this.usersService.update(user, id, updateUserDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string, @Request() req: IReqWithUser) {
-    return this.usersService.remove(req.user, id);
+  remove(@Param('id', ParseUUIDPipe) id: string, @Request() { user }: IReqWithUser) {
+    return this.usersService.remove(user, id);
   }
 }

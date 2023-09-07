@@ -10,10 +10,8 @@ import { UsersRepository } from './repositories/users.repository';
 export class UsersService {
   constructor(private usersRepo: UsersRepository) {}
 
-  private async checkPermission(tokenId: string, paramId: string) {
-    const user: User = await this.usersRepo.findUnique(tokenId);
-
-    if (user?.role !== UserRole.Admin && tokenId !== paramId) throw new ForbiddenException('Insufficient permission');
+  private checkPermission(user: ITokenUser, user_id: string) {
+    if (user.id !== user_id && user.role !== UserRole.Admin) throw new ForbiddenException('Insufficient Permission');
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -23,20 +21,17 @@ export class UsersService {
     return await this.usersRepo.create(createUserDto);
   }
 
-  async findMany(tokenUser: ITokenUser) {
-    const user: User = await this.usersRepo.findUnique(tokenUser.id);
-
-    const admin: boolean = user?.role === UserRole.Admin;
-    if (!admin) throw new ForbiddenException('Insufficient permission');
+  async findMany(role: UserRole) {
+    if (role !== UserRole.Admin) throw new ForbiddenException('Insufficient permission');
 
     return await this.usersRepo.findMany();
   }
 
   async findUnique(tokenUser: ITokenUser, id: string) {
     const user: User = await this.usersRepo.findUnique(id);
-    if (!user) throw new NotFoundException(`User #${id} not found`);
+    if (!user) throw new NotFoundException(`User #: ${id} not found`);
 
-    await this.checkPermission(tokenUser.id, id);
+    this.checkPermission(tokenUser, id);
 
     return user;
   }
@@ -52,7 +47,7 @@ export class UsersService {
     const user: User = await this.usersRepo.findUnique(id);
     if (!user) throw new NotFoundException(`User #${id} not found`);
 
-    await this.checkPermission(tokenUser.id, id);
+    this.checkPermission(tokenUser, id);
 
     return await this.usersRepo.update(id, updateUserDto);
   }
@@ -61,7 +56,7 @@ export class UsersService {
     const user: User = await this.usersRepo.findUnique(id);
     if (!user) throw new NotFoundException(`User #${id} not found`);
 
-    await this.checkPermission(tokenUser.id, id);
+    this.checkPermission(tokenUser, id);
 
     return await this.usersRepo.remove(id);
   }

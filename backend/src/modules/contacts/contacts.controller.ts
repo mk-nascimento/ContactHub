@@ -25,35 +25,35 @@ export class ContactsController {
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createContactDto: CreateContactDto, @Request() req: IReqWithUser) {
-    return this.contactsService.create(req.user.id, createContactDto);
+  create(@Body() createContactDto: CreateContactDto, @Request() { user }: IReqWithUser) {
+    return this.contactsService.create(user.id, createContactDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get()
-  findMany() {
-    return this.contactsService.findMany();
+  findMany(@Request() { user }: IReqWithUser) {
+    return this.contactsService.findMany(user);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.contactsService.findUnique(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string, @Request() { user }: IReqWithUser) {
+    return this.contactsService.findUnique(user, id);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateContactDto: UpdateContactDto) {
-    return this.contactsService.update(id, updateContactDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateContactDto: UpdateContactDto, @Request() { user }: IReqWithUser) {
+    return this.contactsService.update(user, id, updateContactDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.contactsService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: string, @Request() { user }: IReqWithUser) {
+    return this.contactsService.remove(user, id);
   }
 }

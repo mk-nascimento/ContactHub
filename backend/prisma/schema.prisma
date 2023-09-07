@@ -17,7 +17,7 @@ model User {
   password   String
   phone      String
   created_at DateTime  @default(now())
-  role       UserRole      @default(client)
+  role       UserRole  @default(client)
   contacts   Contact[]
 
   @@map("users")

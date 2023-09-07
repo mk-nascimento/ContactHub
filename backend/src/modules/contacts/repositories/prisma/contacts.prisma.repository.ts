@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateContactDto } from '../../dto/create-contact.dto';
@@ -9,6 +10,9 @@ import { ContactsRepository } from '../contacts.repository';
 @Injectable()
 export class ContactsPrismaRepository implements ContactsRepository {
   constructor(private prisma: PrismaService) {}
+  async findDuplicate(user_id: string, { email, full_name, phone }: CreateContactDto) {
+    return await this.prisma.contact.findFirst({ where: { AND: [{ OR: [{ email }, { full_name }, { phone }] }, { user_id }] } });
+  }
 
   async create(user_id: string, data: CreateContactDto): Promise<Contact> {
     const instance = new Contact();
@@ -19,8 +23,8 @@ export class ContactsPrismaRepository implements ContactsRepository {
     return plainToInstance(Contact, contact);
   }
 
-  async findMany(): Promise<Contact[]> {
-    const contacts: Contact[] = await this.prisma.contact.findMany();
+  async findMany(where?: Prisma.ContactFindManyArgs): Promise<Contact[]> {
+    const contacts: Contact[] = await this.prisma.contact.findMany(where);
 
     return plainToInstance(Contact, contacts);
   }

@@ -21,10 +21,10 @@ export class AuthService {
   }
 
   async login(email: string) {
-    const { id }: User = await this.usersService.findUniqueByEmail(email);
+    const { id, role }: User = await this.usersService.findUniqueByEmail(email);
 
     return {
-      token: this.jwtService.sign({ email }, { subject: id }),
+      token: this.jwtService.sign({ email, role }, { subject: id }),
     };
   }
 }
