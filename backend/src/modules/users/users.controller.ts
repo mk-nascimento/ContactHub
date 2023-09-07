@@ -4,11 +4,18 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Request,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { IReqWithUser } from 'src/interfaces';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
@@ -17,33 +24,38 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
   @UseInterceptors(ClassSerializerInterceptor)
+  @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
   @Get()
-  @UseInterceptors(ClassSerializerInterceptor)
-  findMany() {
-    return this.usersService.findMany();
+  findMany(@Request() req: IReqWithUser) {
+    return this.usersService.findMany(req.user);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
-  findUnique(@Param('id') id: string) {
-    return this.usersService.findUnique(id);
+  findUnique(@Param('id', ParseUUIDPipe) id: string, @Request() req: IReqWithUser) {
+    return this.usersService.findUnique(req.user, id);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @UseInterceptors(ClassSerializerInterceptor)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto, @Request() req: IReqWithUser) {
+    return this.usersService.update(req.user, id, updateUserDto);
   }
 
-  @Delete(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  remove(@Param('id', ParseUUIDPipe) id: string, @Request() req: IReqWithUser) {
+    return this.usersService.remove(req.user, id);
   }
 }

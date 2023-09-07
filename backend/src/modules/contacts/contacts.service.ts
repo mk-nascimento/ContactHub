@@ -8,8 +8,8 @@ import { ContactsRepository } from './repositories/contacts.repository';
 export class ContactsService {
   constructor(private contactsRepo: ContactsRepository) {}
 
-  async create(createContactDto: CreateContactDto) {
-    return await this.contactsRepo.create(createContactDto);
+  async create(userId: string, createContactDto: CreateContactDto) {
+    return await this.contactsRepo.create(userId, createContactDto);
   }
 
   async findMany() {

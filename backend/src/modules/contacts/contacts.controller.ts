@@ -5,10 +5,15 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Request,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { IReqWithUser } from 'src/interfaces';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -17,33 +22,38 @@ import { UpdateContactDto } from './dto/update-contact.dto';
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
-  @Post()
   @UseInterceptors(ClassSerializerInterceptor)
-  create(@Body() createContactDto: CreateContactDto) {
-    return this.contactsService.create(createContactDto);
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  create(@Body() createContactDto: CreateContactDto, @Request() req: IReqWithUser) {
+    return this.contactsService.create(req.user.id, createContactDto);
   }
 
-  @Get()
   @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
+  @Get()
   findMany() {
     return this.contactsService.findMany();
   }
 
-  @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  findUnique(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.contactsService.findUnique(id);
   }
 
-  @Patch(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateContactDto: UpdateContactDto) {
     return this.contactsService.update(id, updateContactDto);
   }
 
-  @Delete(':id')
   @UseInterceptors(ClassSerializerInterceptor)
-  remove(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.contactsService.remove(id);
   }
 }

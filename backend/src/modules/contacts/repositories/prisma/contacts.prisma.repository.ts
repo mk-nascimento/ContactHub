@@ -10,11 +10,11 @@ import { ContactsRepository } from '../contacts.repository';
 export class ContactsPrismaRepository implements ContactsRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateContactDto): Promise<Contact> {
+  async create(user_id: string, data: CreateContactDto): Promise<Contact> {
     const instance = new Contact();
     Object.assign(instance, data);
 
-    const contact: Contact = await this.prisma.contact.create({ data: instance });
+    const contact: Contact = await this.prisma.contact.create({ data: { ...instance, user_id } });
 
     return plainToInstance(Contact, contact);
   }

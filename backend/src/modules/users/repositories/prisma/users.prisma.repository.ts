@@ -34,7 +34,7 @@ export class UsersPrismaRepository implements UsersRepository {
   async findUniqueByEmail(email: string): Promise<User> {
     const user: User = await this.prisma.user.findUnique({ where: { email } });
 
-    return plainToInstance(User, user);
+    return user;
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User> {
