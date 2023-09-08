@@ -43,6 +43,10 @@ export class UsersService {
     return user;
   }
 
+  async profile(id: string) {
+    return await this.usersRepo.profile(id);
+  }
+
   async update(tokenUser: ITokenUser, id: string, updateUserDto: UpdateUserDto) {
     const user: User = await this.usersRepo.findUnique(id);
     if (!user) throw new NotFoundException(`User #${id} not found`);

@@ -7,6 +7,8 @@ export class User {
   email: string;
   phone: string;
   created_at: Date;
+
+  @Exclude()
   role: 'admin' | 'client';
 
   @Exclude()

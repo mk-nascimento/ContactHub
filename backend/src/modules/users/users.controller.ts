@@ -39,6 +39,13 @@ export class UsersController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  profile(@Request() { user: { id } }: IReqWithUser) {
+    return this.usersService.profile(id);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findUnique(@Param('id', ParseUUIDPipe) id: string, @Request() { user }: IReqWithUser) {
     return this.usersService.findUnique(user, id);

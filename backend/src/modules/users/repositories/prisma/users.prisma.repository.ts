@@ -3,6 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { UpdateUserDto } from '../../dto/update-user.dto';
+import { UserProfile } from '../../dto/user-profile.dto';
 import { User } from '../../entities/user.entity';
 import { UsersRepository } from '../users.repository';
 
@@ -32,9 +33,13 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findUniqueByEmail(email: string): Promise<User> {
-    const user: User = await this.prisma.user.findUnique({ where: { email } });
+    return await this.prisma.user.findUnique({ where: { email } });
+  }
 
-    return user;
+  async profile(id: string): Promise<UserProfile> {
+    const user: UserProfile = await this.prisma.user.findUnique({ where: { id }, include: { contacts: true } });
+
+    return plainToInstance(UserProfile, user);
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User> {
