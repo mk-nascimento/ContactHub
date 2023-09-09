@@ -8,7 +8,7 @@ export abstract class ContactsRepository {
 
   abstract create(user_id: string, data: CreateContactDto): Promise<Contact>;
 
-  abstract findMany(where?: Prisma.ContactFindManyArgs): Promise<Contact[]>;
+  abstract findMany(args?: Prisma.ContactFindManyArgs): Promise<Contact[]>;
 
   abstract findUnique(id: string): Promise<Contact | undefined>;
 

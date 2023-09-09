@@ -23,8 +23,8 @@ export class ContactsPrismaRepository implements ContactsRepository {
     return plainToInstance(Contact, contact);
   }
 
-  async findMany(where?: Prisma.ContactFindManyArgs): Promise<Contact[]> {
-    const contacts: Contact[] = await this.prisma.contact.findMany(where);
+  async findMany(args?: Prisma.ContactFindManyArgs): Promise<Contact[]> {
+    const contacts: Contact[] = await this.prisma.contact.findMany({ ...args });
 
     return plainToInstance(Contact, contacts);
   }
