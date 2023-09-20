@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { TLoginData, loginSchema } from '../../schemas';
-import { GradientButton } from './GradientButton.component';
+import { GradientButton } from '../Button/Button.gradient.component';
 import { Input } from './Input.component';
 
 export const LoginForm = () => {

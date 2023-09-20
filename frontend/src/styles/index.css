@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
+@layer base {
+  * {
+    @apply box-border
+  }
+
+  body {
+    @apply bg-grey-50 text-grey-900
+  }
 }
 
 @layer components {
