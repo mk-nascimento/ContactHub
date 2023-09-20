@@ -1,21 +1,58 @@
-@tailwind base; @tailwind components; @tailwind utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  background-color: #121214;
-  color: #F1F3F5
+* {
+  box-sizing: border-box;
 }
 
 @layer components {
-  .form {
-    @apply relative transition-all duration-300 ease-in-out flex flex-col items-center justify-center shadow-md bg-gray-900 rounded-lg px-[22px] py-[42px] gap-[24px]
+  .text-28-600 {
+    @apply font-semibold text-[1.75rem];
   }
-  .container {
-    @apply w-[300px] md:w-[600px] lg:w-[720px]
+  .text-20-600 {
+    @apply font-semibold text-xl;
   }
-  .desk-container {
-    @apply md:w-[600px] lg:w-[720px]
+  .text-18-600 {
+    @apply font-semibold text-lg;
   }
-  .icon-button {
-    @apply w-fit p-2 rounded-md cursor-pointer transition-colors duration-500 hover:scale-110 hover:bg-pink-500
+  .text-14-700 {
+    @apply font-bold text-sm;
+  }
+  .text-14-400 {
+    @apply font-normal text-sm;
+  }
+  .text-12-500 {
+    @apply font-medium text-xs;
+  }
+  .text-11-500 {
+    @apply font-medium text-[0.685rem];
+  }
+  .text-10-700 {
+    @apply font-bold text-[0.625rem];
+  }
+  .text-10-400 {
+    @apply font-normal text-[0.625rem];
+  }
+  .text-8-500 {
+    @apply font-medium text-[0.5rem];
+  }
+  .tw-user-forms {
+    @apply w-full max-w-[295px] md:max-w-[400px] flex flex-col gap-[25px];
+  }
+  .tw-user-forms__header {
+    @apply w-full text-center pb-[5px];
+  }
+  .tw-user-forms__title {
+    @apply text-28-600 text-grey-600;
+  }
+  .tw-user-forms__tips {
+    @apply text-14-400 text-grey-400;
+  }
+  .tw-user-forms__redirect {
+    @apply text-14-700 text-brand-100;
+  }
+  .new-input {
+    @apply py-[15px] px-[30px] bg-grey-50 border border-solid border-grey-100 outline-none focus:border-grey-300 rounded-3xl placeholder-grey-300 text-grey-700;
   }
 }

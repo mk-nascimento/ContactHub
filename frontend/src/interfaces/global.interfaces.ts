@@ -2,8 +2,9 @@ export interface Contact {
   id: string;
   full_name: string;
   email: string;
-  cellphone: string;
-  created_at: Date;
+  phone: string;
+  created_at: string;
+  user_id: string;
 }
 
 export interface ContactData extends Partial<Contact> {}

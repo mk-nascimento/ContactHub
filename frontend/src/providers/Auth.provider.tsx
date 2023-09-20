@@ -1,7 +1,5 @@
-import { AxiosError } from 'axios';
-import React, { createContext, useEffect } from 'react';
-import { NavigateFunction, useLocation, useNavigate } from 'react-router-dom';
-
+import React, { createContext } from 'react';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { TLoginData } from '../schemas';
 import api from '../services/axios';
 
@@ -21,26 +19,24 @@ export const AuthContext = createContext({} as AuthContextsValues);
 
 export const AuthProvider = ({ children }: AuthProviderChildren) => {
   const navigate: NavigateFunction = useNavigate();
-  const { pathname }: Partial<Location> = useLocation();
-  const token: string | null = localStorage.getItem('@fullstack-challenge:token');
 
-  useEffect(() => {
-    if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  // useEffect(() => {
+  //   if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
 
-    (async () => {
-      try {
-        await api.get('auth/validate/');
-      } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
-      }
-    })();
-  }, [navigate, pathname, token]);
+  //   (async () => {
+  //     try {
+  //       await api.get('auth/validate/');
+  //     } catch (error) {
+  //       if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
+  //     }
+  //   })();
+  // }, [navigate, pathname, token]);
 
   const login = async (data: TLoginData): Promise<void> => {
     try {
-      const response = await api.post<LoginResponse>('auth/login/', data);
-
-      const { token } = response.data;
+      const {
+        data: { token },
+      } = await api.post<LoginResponse>('auth/login/', data);
 
       api.defaults.headers.common.Authorization = `Bearer ${token}`;
       localStorage.setItem('@fullstack-challenge:token', token);
@@ -51,7 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderChildren) => {
     }
   };
 
-  const logout = async () => (localStorage.clear(), navigate('/'));
+  const logout = async () => navigate('/');
 
   const values = { login, logout };
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;

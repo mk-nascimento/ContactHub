@@ -1,30 +1,49 @@
+import { InputHTMLAttributes } from 'react';
 import { FieldError, UseFormRegisterReturn } from 'react-hook-form';
 
-interface InputProps {
-  error: FieldError | undefined;
+interface IInputFields {
+  className: string;
   id: string;
+  label: string;
+  name: string;
   placeholder: string;
-  register: UseFormRegisterReturn<string>;
-  type?: React.HTMLInputTypeAttribute | undefined;
-  value?: string;
+  type: string;
 }
 
-export const Input = (props: InputProps) => {
+interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  error?: FieldError;
+  fields?: IInputFields;
+  label?: string;
+  register?: UseFormRegisterReturn<string>;
+}
+
+export const Input = ({
+  error,
+  fields,
+  label,
+  register,
+  ...rest
+}: IInputProps) => {
   return (
-    <>
-      <label htmlFor={props.id} className="block text-gray-50 font-bold mb-1 cursor-pointer">
-        {props.placeholder} :
-        <input
-          id={props.id}
-          placeholder={props.placeholder}
-          {...props.register}
-          type={props.type ? props.type : 'te'}
-          className={`w-full bg-gray-200 text-gray-700 placeholder-gray-400 border rounded-md px-[8px] py-[6px] outline-none ${
-            props.error ? 'border-red-500' : 'border-gray-300 focus:border-pink-500 hover:border-pink-400 transition-colors duration-500'
-          } focus:ring focus:ring-pink-300`}
-        />
-      </label>
-      {props.error && <span className="text-red-500 text-sm my-[2px]">{props.error.message}</span>}
-    </>
+    <label
+      className='relative text-14-400 text-grey-600 cursor-pointer'
+      htmlFor={rest.id}
+    >
+      {fields?.label ?? label ?? 'Insert label'}{' '}
+      <span className='inline-flex text-input-alert'>
+        * {error ? error.message : null}{' '}
+      </span>{' '}
+      <input
+        {...rest}
+        {...register}
+        className={`new-input mt-[10px]
+        ${fields?.className ?? ''}
+        ${rest.className ?? ''}`.trim()}
+        id={fields?.id ?? rest.id ?? undefined}
+        name={fields?.name ?? rest.name ?? undefined}
+        placeholder={fields?.placeholder ?? rest.placeholder ?? undefined}
+        type={fields?.type ?? rest.type ?? 'text'}
+      />
+    </label>
   );
 };

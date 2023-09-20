@@ -1,6 +1,5 @@
-import { createContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import { createContext, useState } from 'react';
+import mockedData from '../../.mock';
 import { Contact, ContactData } from '../interfaces/global.interfaces';
 import { TContactPayload } from '../schemas';
 import api from '../services/axios';
@@ -27,25 +26,34 @@ export interface ContactsProviderChildren {
 export const ContactContext = createContext({} as ContactContextValues);
 
 export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>(mockedData.contacts);
   const [addContactModal, setAddContactModal] = useState<boolean>(false);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const [deleteContactModal, setDeleteContactModal] = useState<boolean>(false);
-  const [selectedContact, setSelectedContact] = useState<ContactData>({} as ContactData);
-  const navigate = useNavigate();
-  const token: string | null = localStorage.getItem('@fullstack-challenge:token');
+  const [selectedContact, setSelectedContact] = useState<ContactData>(
+    {} as ContactData
+  );
+  // const navigate = useNavigate();
+  // const token: string | null = localStorage.getItem(
+  //   '@fullstack-challenge:token'
+  // );
 
-  useEffect(() => {
-    (async () => {
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-      const response = await api.get<Contact[]>('contacts/');
-      setContacts(response.data);
-    })();
-  }, [navigate, token]);
+  // useEffect(() => {
+  //   (async () => {
+  //     api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  //     const response = await api.get<Contact[]>('contacts/');
+  //     setContacts(response.data);
+  //   })();
+  // }, [navigate, token]);
 
-  const addContact = async (contactDataPayload: TContactPayload): Promise<void> => {
+  const addContact = async (
+    contactDataPayload: TContactPayload
+  ): Promise<void> => {
     try {
-      const { data, status } = await api.post<Contact>(`contacts/`, contactDataPayload);
+      const { data, status } = await api.post<Contact>(
+        `contacts/`,
+        contactDataPayload
+      );
       if (status === 201) {
         setAddContactModal(false);
         setContacts([...contacts, data]);
@@ -55,12 +63,19 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     }
   };
 
-  const updateContact = async (contactDataPayload: TContactPayload): Promise<void> => {
+  const updateContact = async (
+    contactDataPayload: TContactPayload
+  ): Promise<void> => {
     try {
-      const { data, status } = await api.patch<Contact>(`contacts/${selectedContact.id}`, contactDataPayload);
+      const { data, status } = await api.patch<Contact>(
+        `contacts/${selectedContact.id}`,
+        contactDataPayload
+      );
       if (status === 200) {
         setIsOpenModal(false);
-        setContacts((prev) => prev.map((cont) => (cont.id === data.id ? data : cont)));
+        setContacts((prev) =>
+          prev.map((cont) => (cont.id === data.id ? data : cont))
+        );
       }
     } catch (error) {
       console.error(error);
@@ -72,7 +87,9 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
       const { status } = await api.delete(`contacts/${selectedContact.id}`);
       if (status === 204) {
         setDeleteContactModal(false);
-        setContacts((prev) => prev.filter((cont) => cont.id !== selectedContact.id));
+        setContacts((prev) =>
+          prev.filter((cont) => cont.id !== selectedContact.id)
+        );
       }
     } catch (error) {
       console.error(error);
@@ -93,5 +110,7 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     addContactModal,
     setAddContactModal,
   };
-  return <ContactContext.Provider value={values}>{children}</ContactContext.Provider>;
+  return (
+    <ContactContext.Provider value={values}>{children}</ContactContext.Provider>
+  );
 };
