@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useUser } from '../../../hooks/useUser';
 import { TUserData, userSchema } from '../../../schemas';
-import { GradientButton } from '../../Button/Gradient';
+import { GradientButton } from '../../Buttons/Gradient';
 import { Input } from '../Input';
 import inputRegisterFields from './input.register.fields';
 
