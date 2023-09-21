@@ -10,7 +10,9 @@ import inputRegisterFields from './input.register.fields';
 type TInputNames = 'full_name' | 'email' | 'phone' | 'password' | 'confirm';
 
 export const RegisterForm = () => {
-  const { registerUser } = useUser();
+  const {
+    userService: { register: submit },
+  } = useUser();
 
   const {
     formState: { errors },
@@ -19,7 +21,7 @@ export const RegisterForm = () => {
   } = useForm<TUserData>({ resolver: zodResolver(userSchema) });
 
   return (
-    <form onSubmit={handleSubmit(registerUser)} className='tw-user-forms'>
+    <form onSubmit={handleSubmit(submit)} className='tw-user-forms'>
       <div className='tw-user-forms__header'>
         <h1 className='tw-user-forms__title'>Crie sua conta</h1>
 
