@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import dashboardLogo from '../../assets/dashboard.lo-go.svg';
-import { DisconnectedContainer } from '../../components/Container/Disconnected.container.component';
-import { GradientBorderLink } from '../../components/Link/Link.borderGradient.component';
-import { GradientLink } from '../../components/Link/Link.gradient.component';
+import { DisconnectedContainer } from '../../components/Container/Disconnected';
+import { GradientBorderLink } from '../../components/Link/BorderGradient';
+import { GradientLink } from '../../components/Link/Gradient';
 
 export const Dashboard = () => {
   const { pathname }: Partial<Location> = useLocation();

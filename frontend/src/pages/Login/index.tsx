@@ -1,5 +1,5 @@
-import { DisconnectedContainer } from '../../components/Container/Disconnected.container.component';
-import { LoginForm } from '../../components/Forms/Login.form.component';
+import { DisconnectedContainer } from '../../components/Container/Disconnected';
+import { LoginForm } from '../../components/Forms/Login';
 
 export const Login = () => (
   <DisconnectedContainer>

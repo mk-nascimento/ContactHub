@@ -1,18 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { useUser } from '../../hooks/useUser';
-import { TUserData, userSchema } from '../../schemas';
-import { GradientButton } from '../Button/Button.gradient.component';
-import { Input } from './Input.component';
+import { useUser } from '../../../hooks/useUser';
+import { TUserData, userSchema } from '../../../schemas';
+import { GradientButton } from '../../Button/Gradient';
+import { Input } from '../Input';
 import inputRegisterFields from './input.register.fields';
 
-export type TInputNames =
-  | 'full_name'
-  | 'email'
-  | 'phone'
-  | 'password'
-  | 'confirm';
+type TInputNames = 'full_name' | 'email' | 'phone' | 'password' | 'confirm';
 
 export const RegisterForm = () => {
   const { registerUser } = useUser();
