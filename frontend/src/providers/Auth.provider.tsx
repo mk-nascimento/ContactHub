@@ -1,54 +1,46 @@
-import React, { createContext } from 'react';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import React, { createContext, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Pathnames } from '../enums';
+import { useRequest } from '../hooks/useRequest';
 import { TLoginData } from '../schemas';
-import api from '../services/axios';
+import axios from '../services/axios';
 
-export interface AuthContextsValues {
-  login: (data: TLoginData) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-export interface AuthProviderChildren {
+interface AuthProviderChildren {
   children: React.ReactNode;
 }
-interface LoginResponse {
-  token: string;
+
+interface Authenticator {
+  login(data: TLoginData): Promise<void>;
+  logout(): Promise<void>;
+}
+
+interface AuthContextsValues {
+  authenticator: Authenticator;
 }
 
 export const AuthContext = createContext({} as AuthContextsValues);
 
 export const AuthProvider = ({ children }: AuthProviderChildren) => {
-  const navigate: NavigateFunction = useNavigate();
+  const navigate = useNavigate();
+  const { data: loginData, request } = useRequest<{ token: string }>();
 
-  // useEffect(() => {
-  //   if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  const login = useCallback(
+    async (data: TLoginData) => {
+      await request(() => axios.post('auth/login', data));
 
-  //   (async () => {
-  //     try {
-  //       await api.get('auth/validate/');
-  //     } catch (error) {
-  //       if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
-  //     }
-  //   })();
-  // }, [navigate, pathname, token]);
+      if (loginData?.token) {
+        Cookies.set('token', loginData.token, { secure: true, sameSite: 'Lax' });
+        navigate(Pathnames.Homepage);
+      }
+    },
+    [loginData, navigate, request],
+  );
 
-  const login = async (data: TLoginData): Promise<void> => {
-    try {
-      const {
-        data: { token },
-      } = await api.post<LoginResponse>('auth/login/', data);
+  const logout = useCallback(async () => navigate(Pathnames.Dashboard), [navigate]);
 
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-      localStorage.setItem('@fullstack-challenge:token', token);
+  const authenticator = useMemo(() => ({ login, logout }), [login, logout]);
 
-      if (token) navigate('dashboard');
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const logout = async () => navigate('/');
-
-  const values = { login, logout };
+  const values = useMemo(() => ({ authenticator }), [authenticator]);
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
 };

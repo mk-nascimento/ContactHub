@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import greenLogo from '../../../assets/green.lo-go.svg';
 import whiteLogo from '../../../assets/white.lo-go.svg';
-import { Pathnames } from '../../../enums/paths';
+import { Pathnames } from '../../../enums';
 
 interface IDisconnectedContainerProps {
   children: React.ReactNode;

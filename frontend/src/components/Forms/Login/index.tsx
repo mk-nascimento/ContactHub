@@ -7,7 +7,9 @@ import { GradientButton } from '../../Buttons/Gradient';
 import { Input } from '../Input';
 
 export const LoginForm = () => {
-  const { login } = useAuth();
+  const {
+    authenticator: { login },
+  } = useAuth();
 
   const {
     formState: { errors },

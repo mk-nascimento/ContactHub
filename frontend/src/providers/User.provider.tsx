@@ -1,11 +1,11 @@
 import Cookies from 'js-cookie';
 import { createContext, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pathnames } from '../enums/paths';
+import { Pathnames, endpoints } from '../enums';
 import { useRequest } from '../hooks/useRequest';
 import { Contact } from '../interfaces';
 import { TUserData } from '../schemas';
-import api from '../services/axios';
+import axios from '../services/axios';
 
 interface UserProviderProps {
   children: React.ReactNode;
@@ -47,17 +47,17 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const { request: destroyRequest } = useRequest();
 
   const profile = useCallback(async () => {
-    await profileRequest(() => api.get('profile'));
+    await profileRequest(() => axios.get('profile'));
 
     if (profileData) setUserProfile(profileData);
   }, [profileData, profileRequest]);
 
   const register = useCallback(
     async (data: TUserData) => {
-      await registerRequest(() => api.post('users', data));
+      await registerRequest(() => axios.post(endpoints.User, data));
 
       if (registerData) {
-        await loginRequest(() => api.post('auth/login', data));
+        await loginRequest(() => axios.post(endpoints.Login, data));
 
         if (loginData?.token) {
           Cookies.set('token', loginData.token, { secure: true });
@@ -70,13 +70,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const update = useCallback(
     async (updateData: TUserData) => {
-      await updateRequest(() => api.patch(`users/${userProfile?.id}`, updateData));
+      await updateRequest(() => axios.patch(`${endpoints.User}/${userProfile?.id}`, updateData));
     },
     [userProfile, updateRequest],
   );
 
   const destroy = useCallback(async () => {
-    await destroyRequest(() => api.delete(`users/${userProfile?.id}`));
+    await destroyRequest(() => axios.delete(`${endpoints.User}/${userProfile?.id}`));
   }, [userProfile, destroyRequest]);
 
   const userService: UserService = useMemo(

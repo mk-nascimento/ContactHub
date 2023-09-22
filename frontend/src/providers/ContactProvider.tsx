@@ -1,116 +1,81 @@
-import { createContext, useState } from 'react';
+import { HttpStatusCode } from 'axios';
+import Cookies from 'js-cookie';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import mockedData from '../../.mock';
-import { Contact, ContactData } from '../interfaces/global.interfaces';
+import { endpoints } from '../enums';
+import { useRequest } from '../hooks/useRequest';
+import { Contact } from '../interfaces';
 import { TContactPayload } from '../schemas';
-import api from '../services/axios';
-
-interface ContactContextValues {
-  contacts: Contact[];
-  isOpenModal: boolean;
-  setIsOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  deleteContactModal: boolean;
-  setDeleteContactModal: React.Dispatch<React.SetStateAction<boolean>>;
-  addContactModal: boolean;
-  setAddContactModal: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedContact: ContactData;
-  setSelectedContact: React.Dispatch<React.SetStateAction<ContactData>>;
-  addContact: (contactDataPayload: TContactPayload) => Promise<void>;
-  updateContact: (data: TContactPayload) => Promise<void>;
-  deleteContact: () => Promise<void>;
-}
+import axios from '../services/axios';
 
 export interface ContactsProviderChildren {
   children: React.ReactNode;
 }
 
+interface ContactService {
+  create(data: TContactPayload): Promise<void>;
+  read(): Promise<void>;
+  update(data: TContactPayload): Promise<void>;
+  destroy(): Promise<void>;
+}
+
+interface ContactContextValues {}
+
 export const ContactContext = createContext({} as ContactContextValues);
 
 export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
-  const [contacts, setContacts] = useState<Contact[]>(mockedData.contacts);
-  const [addContactModal, setAddContactModal] = useState<boolean>(false);
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
-  const [deleteContactModal, setDeleteContactModal] = useState<boolean>(false);
-  const [selectedContact, setSelectedContact] = useState<ContactData>(
-    {} as ContactData
+  const token = Cookies.get('token');
+
+  const { data: newContact, request: createRequest } = useRequest<Contact>();
+  const { data: contactInstance, request: updateRequest } = useRequest<Contact>();
+  const { data: contactsList, request: readRequest, status: readStatus } = useRequest<Contact[]>();
+  const { request: destroyRequest, status: destroyStatus } = useRequest();
+
+  const [contacts, setContacts] = useState<Contact[]>(mockedData.contacts ?? contactsList);
+  axios.defaults.headers.common.Authorization = `Bearer ${token ?? mockedData.token}`;
+
+  const create = useCallback(
+    async (contactDataPayload: TContactPayload) => {
+      await createRequest(() => axios.post(endpoints.Contact, contactDataPayload));
+
+      if (newContact) setContacts([...contacts, newContact]);
+    },
+    [contacts, createRequest, newContact],
   );
-  // const navigate = useNavigate();
-  // const token: string | null = localStorage.getItem(
-  //   '@fullstack-challenge:token'
-  // );
 
-  // useEffect(() => {
-  //   (async () => {
-  //     api.defaults.headers.common.Authorization = `Bearer ${token}`;
-  //     const response = await api.get<Contact[]>('contacts/');
-  //     setContacts(response.data);
-  //   })();
-  // }, [navigate, token]);
+  const read = useCallback(async () => {
+    await readRequest(() => axios.get(endpoints.Contact));
 
-  const addContact = async (
-    contactDataPayload: TContactPayload
-  ): Promise<void> => {
-    try {
-      const { data, status } = await api.post<Contact>(
-        `contacts/`,
-        contactDataPayload
-      );
-      if (status === 201) {
-        setAddContactModal(false);
-        setContacts([...contacts, data]);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    if (readStatus === HttpStatusCode.Ok) setContacts(contactsList as Contact[]);
+  }, [contactsList, readRequest, readStatus]);
 
-  const updateContact = async (
-    contactDataPayload: TContactPayload
-  ): Promise<void> => {
-    try {
-      const { data, status } = await api.patch<Contact>(
-        `contacts/${selectedContact.id}`,
-        contactDataPayload
-      );
-      if (status === 200) {
-        setIsOpenModal(false);
-        setContacts((prev) =>
-          prev.map((cont) => (cont.id === data.id ? data : cont))
-        );
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const update = useCallback(
+    async (contactDataPayload: TContactPayload) => {
+      await updateRequest(() => axios.patch(`${endpoints.Contact}/${contacts[0].id}`, contactDataPayload));
 
-  const deleteContact = async (): Promise<void> => {
-    try {
-      const { status } = await api.delete(`contacts/${selectedContact.id}`);
-      if (status === 204) {
-        setDeleteContactModal(false);
-        setContacts((prev) =>
-          prev.filter((cont) => cont.id !== selectedContact.id)
-        );
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const values = {
-    contacts,
-    isOpenModal,
-    setIsOpenModal,
-    selectedContact,
-    setSelectedContact,
-    addContact,
-    updateContact,
-    deleteContact,
-    deleteContactModal,
-    setDeleteContactModal,
-    addContactModal,
-    setAddContactModal,
-  };
-  return (
-    <ContactContext.Provider value={values}>{children}</ContactContext.Provider>
+      if (contactInstance) setContacts((prev) => [...prev.filter((cont) => cont.id !== contactInstance.id), contactInstance]);
+    },
+    [contactInstance, contacts, updateRequest],
   );
+
+  const destroy = useCallback(async () => {
+    await destroyRequest(() => axios.delete(`${endpoints.Contact}/${contacts[0].id}`));
+
+    if (destroyStatus === HttpStatusCode.NoContent) setContacts((prev) => prev.filter((cont) => cont.id !== contacts[0].id));
+  }, [contacts, destroyRequest, destroyStatus]);
+
+  const contactService: ContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      await contactService.read();
+    };
+
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const values = useMemo(() => ({ contactService }), [contactService]);
+
+  return <ContactContext.Provider value={values}>{children}</ContactContext.Provider>;
 };
