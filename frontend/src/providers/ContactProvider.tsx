@@ -15,8 +15,8 @@ export interface ContactsProviderChildren {
 interface ContactService {
   create(data: TContactPayload): Promise<void>;
   read(): Promise<void>;
-  update(data: TContactPayload): Promise<void>;
-  destroy(): Promise<void>;
+  update(data: TContactPayload, id: string): Promise<void>;
+  destroy(id: string): Promise<void>;
 }
 
 interface ContactContextValues {}
@@ -50,19 +50,22 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
   }, [contactsList, readRequest, readStatus]);
 
   const update = useCallback(
-    async (contactDataPayload: TContactPayload) => {
-      await updateRequest(() => axios.patch(`${endpoints.Contact}/${contacts[0].id}`, contactDataPayload));
+    async (contactDataPayload: TContactPayload, id: string) => {
+      await updateRequest(() => axios.patch(`${endpoints.Contact}/${id}}`, contactDataPayload));
 
-      if (contactInstance) setContacts((prev) => [...prev.filter((cont) => cont.id !== contactInstance.id), contactInstance]);
+      if (contactInstance) setContacts((prev) => [...prev.filter((cont) => cont.id !== id), contactInstance]);
     },
-    [contactInstance, contacts, updateRequest],
+    [contactInstance, updateRequest],
   );
 
-  const destroy = useCallback(async () => {
-    await destroyRequest(() => axios.delete(`${endpoints.Contact}/${contacts[0].id}`));
+  const destroy = useCallback(
+    async (id: string) => {
+      await destroyRequest(() => axios.delete(`${endpoints.Contact}/${id}`));
 
-    if (destroyStatus === HttpStatusCode.NoContent) setContacts((prev) => prev.filter((cont) => cont.id !== contacts[0].id));
-  }, [contacts, destroyRequest, destroyStatus]);
+      if (destroyStatus === HttpStatusCode.NoContent) setContacts((prev) => prev.filter((cont) => cont.id !== id));
+    },
+    [destroyRequest, destroyStatus],
+  );
 
   const contactService: ContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
 
