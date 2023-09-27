@@ -1,8 +1,6 @@
 import { HttpStatusCode } from 'axios';
-import Cookies from 'js-cookie';
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import mockedData from '../../.mock';
-import { endpoints } from '../enums';
+import { createContext, useCallback, useEffect, useMemo } from 'react';
+import { Endpoints } from '../enums';
 import { useRequest } from '../hooks/useRequest';
 import { Contact } from '../interfaces';
 import { TContactPayload } from '../schemas';
@@ -19,55 +17,63 @@ interface ContactService {
   destroy(id: string): Promise<void>;
 }
 
-interface ContactContextValues {}
+interface ReturnData {
+  contactList: Contact[];
+}
+
+interface Status {
+  [key: string]: HttpStatusCode | undefined;
+}
+
+interface ContactContextValues {
+  contactService: ContactService;
+  data: ReturnData;
+  responseStatus: Status;
+}
 
 export const ContactContext = createContext({} as ContactContextValues);
 
 export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
-  const token = Cookies.get('token');
-
-  const { data: newContact, request: createRequest } = useRequest<Contact>();
-  const { data: contactInstance, request: updateRequest } = useRequest<Contact>();
-  const { data: contactsList, request: readRequest, status: readStatus } = useRequest<Contact[]>();
+  const { request: createRequest, status: createStatus } = useRequest<Contact>();
+  const { request: updateRequest, status: updateStatus } = useRequest<Contact>();
+  const { data: contactList, request: readRequest } = useRequest<Contact[]>();
   const { request: destroyRequest, status: destroyStatus } = useRequest();
-
-  const [contacts, setContacts] = useState<Contact[]>(mockedData.contacts ?? contactsList);
-  axios.defaults.headers.common.Authorization = `Bearer ${token ?? mockedData.token}`;
 
   const create = useCallback(
     async (contactDataPayload: TContactPayload) => {
-      await createRequest(() => axios.post(endpoints.Contact, contactDataPayload));
+      await createRequest(() => axios.post(Endpoints.Contact, contactDataPayload));
 
-      if (newContact) setContacts([...contacts, newContact]);
+      if (createStatus === HttpStatusCode.Created) await readRequest(() => axios.get(Endpoints.Contact));
     },
-    [contacts, createRequest, newContact],
+    [createRequest, createStatus, readRequest],
   );
 
-  const read = useCallback(async () => {
-    await readRequest(() => axios.get(endpoints.Contact));
-
-    if (readStatus === HttpStatusCode.Ok) setContacts(contactsList as Contact[]);
-  }, [contactsList, readRequest, readStatus]);
+  const read = useCallback(async () => await readRequest(() => axios.get(Endpoints.Contact)), [readRequest]);
 
   const update = useCallback(
     async (contactDataPayload: TContactPayload, id: string) => {
-      await updateRequest(() => axios.patch(`${endpoints.Contact}/${id}}`, contactDataPayload));
+      await updateRequest(() => axios.patch(`${Endpoints.Contact}/${id}}`, contactDataPayload));
 
-      if (contactInstance) setContacts((prev) => [...prev.filter((cont) => cont.id !== id), contactInstance]);
+      if (updateStatus === HttpStatusCode.Created) await readRequest(() => axios.get(Endpoints.Contact));
     },
-    [contactInstance, updateRequest],
+    [readRequest, updateRequest, updateStatus],
   );
 
   const destroy = useCallback(
     async (id: string) => {
-      await destroyRequest(() => axios.delete(`${endpoints.Contact}/${id}`));
+      await destroyRequest(() => axios.delete(`${Endpoints.Contact}/${id}`));
 
-      if (destroyStatus === HttpStatusCode.NoContent) setContacts((prev) => prev.filter((cont) => cont.id !== id));
+      if (destroyStatus === HttpStatusCode.NoContent) await readRequest(() => axios.get(Endpoints.Contact));
     },
-    [destroyRequest, destroyStatus],
+    [destroyRequest, destroyStatus, readRequest],
   );
 
   const contactService: ContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
+  const data: ReturnData = useMemo(() => ({ contactList: contactList ?? [] }), [contactList]);
+  const responseStatus: Status = useMemo(
+    () => ({ createStatus, updateStatus, destroyStatus }),
+    [createStatus, updateStatus, destroyStatus],
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,10 +81,9 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     };
 
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [contactService]);
 
-  const values = useMemo(() => ({ contactService }), [contactService]);
+  const values = useMemo(() => ({ contactService, data, responseStatus }), [contactService, data, responseStatus]);
 
   return <ContactContext.Provider value={values}>{children}</ContactContext.Provider>;
 };

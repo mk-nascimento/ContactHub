@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
+import { Pathnames } from '../../../enums';
 import { useAuth } from '../../../hooks/useAuth';
 import { TLoginData, loginSchema } from '../../../schemas';
 import { GradientButton } from '../../Buttons/Gradient';
@@ -24,7 +25,7 @@ export const LoginForm = () => {
 
         <p className='tw-user-forms__tips'>
           Ainda não possui uma conta?{' '}
-          <Link to='/register' className='tw-user-forms__redirect'>
+          <Link to={Pathnames.Register} className='tw-user-forms__redirect'>
             Cadastro
           </Link>
         </p>

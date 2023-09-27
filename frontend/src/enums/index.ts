@@ -1,12 +1,13 @@
 export enum Pathnames {
-  Dashboard = '/',
+  Index = '/',
+  Dashboard = '/dashboard',
   Homepage = '/homepage',
   Login = '/login',
   Profile = '/profile',
   Register = '/register',
 }
 
-export enum endpoints {
+export enum Endpoints {
   Contact = 'contacts/',
   User = 'users/',
   Login = 'auth/login/',

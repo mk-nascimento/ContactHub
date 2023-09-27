@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import { createContext, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pathnames, endpoints } from '../enums';
+import { Endpoints, Pathnames } from '../enums';
 import { useRequest } from '../hooks/useRequest';
 import { Contact } from '../interfaces';
 import { TUserData } from '../schemas';
@@ -54,10 +54,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const register = useCallback(
     async (data: TUserData) => {
-      await registerRequest(() => axios.post(endpoints.User, data));
+      await registerRequest(() => axios.post(Endpoints.User, data));
 
       if (registerData) {
-        await loginRequest(() => axios.post(endpoints.Login, data));
+        await loginRequest(() => axios.post(Endpoints.Login, data));
 
         if (loginData?.token) {
           Cookies.set('token', loginData.token, { secure: true });
@@ -70,13 +70,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const update = useCallback(
     async (updateData: TUserData) => {
-      await updateRequest(() => axios.patch(`${endpoints.User}/${userProfile?.id}`, updateData));
+      await updateRequest(() => axios.patch(`${Endpoints.User}/${userProfile?.id}`, updateData));
     },
     [userProfile, updateRequest],
   );
 
   const destroy = useCallback(async () => {
-    await destroyRequest(() => axios.delete(`${endpoints.User}/${userProfile?.id}`));
+    await destroyRequest(() => axios.delete(`${Endpoints.User}/${userProfile?.id}`));
   }, [userProfile, destroyRequest]);
 
   const userService: UserService = useMemo(
