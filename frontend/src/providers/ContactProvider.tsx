@@ -1,10 +1,10 @@
 import { HttpStatusCode } from 'axios';
 import { createContext, useCallback, useEffect, useMemo } from 'react';
-import { Endpoints } from '../enums';
-import { useRequest } from '../hooks/useRequest';
-import { Contact } from '../interfaces';
-import { TContactPayload } from '../schemas';
-import axios from '../services/axios';
+import { Endpoints } from 'src/enums';
+import { useRequest } from 'src/hooks/useRequest';
+import { Contact } from 'src/interfaces';
+import { TContactPayload } from 'src/schemas';
+import axios from 'src/services/axios';
 
 export interface ContactsProviderChildren {
   children: React.ReactNode;
@@ -40,33 +40,26 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
   const { request: destroyRequest, status: destroyStatus } = useRequest();
 
   const create = useCallback(
-    async (contactDataPayload: TContactPayload) => {
-      await createRequest(() => axios.post(Endpoints.Contact, contactDataPayload));
-
-      if (createStatus === HttpStatusCode.Created) await readRequest(() => axios.get(Endpoints.Contact));
-    },
-    [createRequest, createStatus, readRequest],
+    async (contactDataPayload: TContactPayload) => await createRequest(() => axios.post(Endpoints.Contact, contactDataPayload)),
+    [createRequest],
   );
 
   const read = useCallback(async () => await readRequest(() => axios.get(Endpoints.Contact)), [readRequest]);
 
   const update = useCallback(
-    async (contactDataPayload: TContactPayload, id: string) => {
-      await updateRequest(() => axios.patch(`${Endpoints.Contact}/${id}}`, contactDataPayload));
-
-      if (updateStatus === HttpStatusCode.Created) await readRequest(() => axios.get(Endpoints.Contact));
-    },
-    [readRequest, updateRequest, updateStatus],
+    async (contactDataPayload: TContactPayload, id: string) =>
+      await updateRequest(() => axios.patch(`${Endpoints.Contact}/${id}}`, contactDataPayload)),
+    [updateRequest],
   );
 
   const destroy = useCallback(
-    async (id: string) => {
-      await destroyRequest(() => axios.delete(`${Endpoints.Contact}/${id}`));
-
-      if (destroyStatus === HttpStatusCode.NoContent) await readRequest(() => axios.get(Endpoints.Contact));
-    },
-    [destroyRequest, destroyStatus, readRequest],
+    async (id: string) => await destroyRequest(() => axios.delete(`${Endpoints.Contact}/${id}`)),
+    [destroyRequest],
   );
+
+  useEffect(() => {
+    if (createStatus || updateStatus || destroyStatus) (async () => await read())();
+  }, [createStatus, destroyStatus, updateStatus, read]);
 
   const contactService: ContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
   const data: ReturnData = useMemo(() => ({ contactList: contactList ?? [] }), [contactList]);
@@ -74,14 +67,6 @@ export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
     () => ({ createStatus, updateStatus, destroyStatus }),
     [createStatus, updateStatus, destroyStatus],
   );
-
-  useEffect(() => {
-    const loadData = async () => {
-      await contactService.read();
-    };
-
-    loadData();
-  }, [contactService]);
 
   const values = useMemo(() => ({ contactService, data, responseStatus }), [contactService, data, responseStatus]);
 

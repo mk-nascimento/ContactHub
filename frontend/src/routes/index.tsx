@@ -1,14 +1,15 @@
 import { Route, Routes } from 'react-router-dom';
-import { Authenticated } from '../components/Authenticated';
-import { Pathnames } from '../enums';
-import { Dashboard } from '../pages/Dashboard';
-import { Login } from '../pages/Login';
-import { Register } from '../pages/Register';
+import { Authenticated } from 'src/components/Authenticated';
+import { Pathnames } from 'src/enums';
+import { Dashboard } from 'src/pages/Dashboard';
+import { Homepage } from 'src/pages/Homepage';
+import { Login } from 'src/pages/Login';
+import { Register } from 'src/pages/Register';
 
 export const AppRoutes = () => (
   <Routes>
-    <Route path={Pathnames.Index} element={<Authenticated />}>
-      <Route index element={<h1>HOMEPAGE</h1>} />
+    <Route path={Pathnames.Homepage} element={<Authenticated />}>
+      <Route index element={<Homepage />} />
     </Route>
 
     <Route path={Pathnames.Dashboard} element={<Dashboard />} />

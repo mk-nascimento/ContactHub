@@ -1,7 +1,6 @@
 export enum Pathnames {
-  Index = '/',
   Dashboard = '/dashboard',
-  Homepage = '/homepage',
+  Homepage = '/',
   Login = '/login',
   Profile = '/profile',
   Register = '/register',
