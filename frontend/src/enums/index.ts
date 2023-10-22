@@ -8,7 +8,8 @@ export enum Pathnames {
 
 export enum Endpoints {
   Contact = 'contacts/',
-  User = 'users/',
   Login = 'auth/login/',
+  Profile = 'users/profile/',
+  User = 'users/',
   Validate = 'auth/validate/',
 }

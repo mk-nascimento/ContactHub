@@ -18,7 +18,7 @@ export const ContactList = ({ view, ...props }: Props) => {
   }, [read]);
 
   return (
-    <div className='tw-authenticated-page-main-content contact-list-container flex h-full w-full flex-col'>
+    <div className='tw-authenticated-page-main-child contact-list-container flex h-full w-full flex-col'>
       <div className='flex flex-col gap-[12px] px-[16px]'>
         <button
           disabled={view}

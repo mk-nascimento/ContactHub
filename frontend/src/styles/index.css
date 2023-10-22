@@ -67,6 +67,9 @@
   .tw-aside-options {
     @apply flex cursor-pointer items-center gap-[8px] underline;
   }
+  .tw-authenticated-page-main-child {
+    @apply gap-[32px] rounded-[16px] bg-grey-100 p-[16px] shadow-lg shadow-brand-100;
+  }
   .new-input {
     @apply rounded-3xl border border-solid border-grey-100 bg-grey-50 px-[30px] py-[15px] text-grey-700 placeholder-grey-300 outline-none focus:border-grey-300;
   }
