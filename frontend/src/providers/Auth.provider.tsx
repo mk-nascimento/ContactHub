@@ -1,10 +1,10 @@
 import Cookies from 'js-cookie';
-import React, { createContext, useCallback, useMemo } from 'react';
+import { createContext, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pathnames } from '../enums';
-import { useRequest } from '../hooks/useRequest';
-import { TLoginData } from '../schemas';
-import axios from '../services/axios';
+import { Pathnames } from 'src/enums';
+import { useRequest } from 'src/hooks/useRequest';
+import { TLoginData } from 'src/schemas';
+import axios from 'src/services/axios';
 
 interface AuthProviderChildren {
   children: React.ReactNode;

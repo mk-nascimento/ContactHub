@@ -1,11 +1,11 @@
 import Cookies from 'js-cookie';
-import { createContext, useCallback, useMemo, useState } from 'react';
+import { createContext, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Endpoints, Pathnames } from '../enums';
-import { useRequest } from '../hooks/useRequest';
-import { Contact } from '../interfaces';
-import { TUserData } from '../schemas';
-import axios from '../services/axios';
+import { Endpoints, Pathnames } from 'src/enums';
+import { useRequest } from 'src/hooks/useRequest';
+import { Contact } from 'src/interfaces';
+import { TUserData } from 'src/schemas';
+import axios from 'src/services/axios';
 
 interface UserProviderProps {
   children: React.ReactNode;
@@ -30,27 +30,32 @@ interface UserService {
   destroy: () => Promise<void>;
 }
 
+interface ReturnData {
+  profile: UserProfile | null;
+}
+
+interface Errors {
+  [key: string]: unknown;
+}
+
 interface UserContextValues {
   userService: UserService;
+  data: ReturnData;
+  errors: Errors;
 }
 
 export const UserContext = createContext({} as UserContextValues);
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<UserProfile>();
 
-  const { data: profileData, request: profileRequest } = useRequest<UserProfile>();
-  const { data: registerData, request: registerRequest } = useRequest<UserResponse>();
-  const { request: updateRequest } = useRequest<UserResponse>();
-  const { data: loginData, request: loginRequest } = useRequest<{ token: string }>();
-  const { request: destroyRequest } = useRequest();
+  const { data: profileData, error: profileError, request: profileRequest } = useRequest<UserProfile>();
+  const { data: registerData, error: registerError, request: registerRequest } = useRequest<UserResponse>();
+  const { error: updateError, request: updateRequest } = useRequest<UserResponse>();
+  const { data: loginData, error: loginError, request: loginRequest } = useRequest<{ token: string }>();
+  const { error: destroyError, request: destroyRequest } = useRequest();
 
-  const profile = useCallback(async () => {
-    await profileRequest(() => axios.get('profile'));
-
-    if (profileData) setUserProfile(profileData);
-  }, [profileData, profileRequest]);
+  const profile = useCallback(async () => await profileRequest(() => axios.get('profile')), [profileRequest]);
 
   const register = useCallback(
     async (data: TUserData) => {
@@ -69,22 +74,26 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   );
 
   const update = useCallback(
-    async (updateData: TUserData) => {
-      await updateRequest(() => axios.patch(`${Endpoints.User}/${userProfile?.id}`, updateData));
-    },
-    [userProfile, updateRequest],
+    async (body: TUserData) => await updateRequest(() => axios.patch(`${Endpoints.User}/${profileData?.id}`, body)),
+    [profileData, updateRequest],
   );
 
-  const destroy = useCallback(async () => {
-    await destroyRequest(() => axios.delete(`${Endpoints.User}/${userProfile?.id}`));
-  }, [userProfile, destroyRequest]);
+  const destroy = useCallback(
+    async () => await destroyRequest(() => axios.delete(`${Endpoints.User}/${profileData?.id}`)),
+    [profileData, destroyRequest],
+  );
 
   const userService: UserService = useMemo(
     () => ({ register, profile, update, destroy }),
     [register, profile, update, destroy],
   );
+  const data: ReturnData = useMemo(() => ({ profile: profileData }), [profileData]);
+  const errors: Errors = useMemo(
+    () => ({ profileError, registerError, updateError, loginError, destroyError }),
+    [profileError, registerError, updateError, loginError, destroyError],
+  );
 
-  const values = useMemo(() => ({ userService }), [userService]);
+  const values = useMemo(() => ({ data, errors, userService }), [data, errors, userService]);
 
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
 };
