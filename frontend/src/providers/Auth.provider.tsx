@@ -1,7 +1,8 @@
+import { HttpStatusCode } from 'axios';
 import Cookies from 'js-cookie';
-import { createContext, useCallback, useMemo } from 'react';
+import { createContext, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pathnames } from 'src/enums';
+import { Endpoints, Pathnames } from 'src/enums';
 import { useRequest } from 'src/hooks/useRequest';
 import { TLoginData } from 'src/schemas';
 import axios from 'src/services/axios';
@@ -23,18 +24,18 @@ export const AuthContext = createContext({} as AuthContextsValues);
 
 export const AuthProvider = ({ children }: AuthProviderChildren) => {
   const navigate = useNavigate();
-  const { data: loginData, request } = useRequest<{ token: string }>();
+  const { data, request, status } = useRequest<{ token: string }>();
+
+  useEffect(() => {
+    if (status === HttpStatusCode.Ok) {
+      Cookies.set('token', data!.token, { secure: true, sameSite: 'Lax' });
+      navigate(Pathnames.Homepage);
+    }
+  }, [data, navigate, status]);
 
   const login = useCallback(
-    async (data: TLoginData) => {
-      await request(() => axios.post('auth/login', data));
-
-      if (loginData?.token) {
-        Cookies.set('token', loginData.token, { secure: true, sameSite: 'Lax' });
-        navigate(Pathnames.Homepage);
-      }
-    },
-    [loginData, navigate, request],
+    async (payload: TLoginData) => await request(() => axios.post(Endpoints.Login, payload)),
+    [request],
   );
 
   const logout = useCallback(async () => navigate(Pathnames.Dashboard), [navigate]);

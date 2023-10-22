@@ -1,5 +1,5 @@
-import Cookies from 'js-cookie';
-import { createContext, useCallback, useMemo } from 'react';
+import { HttpStatusCode } from 'axios';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Endpoints, Pathnames } from 'src/enums';
 import { useRequest } from 'src/hooks/useRequest';
@@ -24,10 +24,10 @@ interface UserProfile extends UserResponse {
 }
 
 interface UserService {
-  profile: () => Promise<void>;
-  register: (data: TUserData) => Promise<void>;
-  update: (updateData: TUserData) => Promise<void>;
-  destroy: () => Promise<void>;
+  profile(): Promise<void>;
+  register(data: TUserData): Promise<void>;
+  update(updateData: TUserData): Promise<void>;
+  destroy(): Promise<void>;
 }
 
 interface ReturnData {
@@ -48,29 +48,29 @@ export const UserContext = createContext({} as UserContextValues);
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const navigate = useNavigate();
-
   const { data: profileData, error: profileError, request: profileRequest } = useRequest<UserProfile>();
-  const { data: registerData, error: registerError, request: registerRequest } = useRequest<UserResponse>();
+  const { error: registerError, request: registerRequest, status: registerStatus } = useRequest<UserResponse>();
   const { error: updateError, request: updateRequest } = useRequest<UserResponse>();
-  const { data: loginData, error: loginError, request: loginRequest } = useRequest<{ token: string }>();
   const { error: destroyError, request: destroyRequest } = useRequest();
+  const [loginPayload, setLoginPayload] = useState<Pick<TUserData, 'email' | 'password'>>();
+  const { request: login, status: loginStatus } = useRequest<{ token: string }>();
 
-  const profile = useCallback(async () => await profileRequest(() => axios.get('profile')), [profileRequest]);
+  useEffect(() => {
+    if (registerStatus === HttpStatusCode.Created) login(() => axios.post(Endpoints.Login, loginPayload));
+  }, [login, loginPayload, registerStatus]);
+
+  useEffect(() => {
+    if (loginStatus === HttpStatusCode.Ok) navigate(Pathnames.Homepage);
+  }, [loginStatus, navigate]);
+
+  const profile = useCallback(async () => await profileRequest(() => axios.get(Endpoints.Profile)), [profileRequest]);
 
   const register = useCallback(
     async (data: TUserData) => {
       await registerRequest(() => axios.post(Endpoints.User, data));
-
-      if (registerData) {
-        await loginRequest(() => axios.post(Endpoints.Login, data));
-
-        if (loginData?.token) {
-          Cookies.set('token', loginData.token, { secure: true });
-          navigate(Pathnames.Homepage);
-        }
-      }
+      setLoginPayload({ email: data.email, password: data.password });
     },
-    [loginData, loginRequest, navigate, registerData, registerRequest],
+    [registerRequest],
   );
 
   const update = useCallback(
@@ -89,8 +89,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   );
   const data: ReturnData = useMemo(() => ({ profile: profileData }), [profileData]);
   const errors: Errors = useMemo(
-    () => ({ profileError, registerError, updateError, loginError, destroyError }),
-    [profileError, registerError, updateError, loginError, destroyError],
+    () => ({ profileError, registerError, updateError, destroyError }),
+    [profileError, registerError, updateError, destroyError],
   );
 
   const values = useMemo(() => ({ data, errors, userService }), [data, errors, userService]);
