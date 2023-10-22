@@ -15,8 +15,8 @@ interface UserResponse {
   id: string;
   full_name: string;
   email: string;
+  phone: string;
   created_at: Date;
-  role: 'client' | 'admin';
 }
 
 interface UserProfile extends UserResponse {
