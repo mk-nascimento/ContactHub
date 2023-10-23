@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ContactList } from 'src/components/ContactsList';
 import { MainContainer } from 'src/components/Container/Main';
 import { useUser } from 'src/hooks/useUser';
+import { handleProfilePdf } from 'utils/profile.pdf';
 import { phoneReplaceRegex } from 'utils/string.utils';
 
 export const Profile = () => {
@@ -35,7 +36,10 @@ export const Profile = () => {
               </p>
             </div>
 
-            <button className='text-14-700 w-full rounded-[8px] border border-brand-neutral py-[6px] text-center text-brand-300 md:w-fit md:px-[26px]'>
+            <button
+              onClick={() => handleProfilePdf(profileData!)}
+              className='text-14-700 w-full rounded-[8px] border border-brand-neutral py-[6px] text-center text-brand-300 md:w-fit md:px-[26px]'
+            >
               Exportar dados
             </button>
           </div>
