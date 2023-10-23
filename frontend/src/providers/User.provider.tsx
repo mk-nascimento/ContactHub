@@ -6,10 +6,7 @@ import { useRequest } from 'src/hooks/useRequest';
 import { Contact } from 'src/interfaces';
 import { TUserData } from 'src/schemas';
 import axios from 'src/services/axios';
-
-interface UserProviderProps {
-  children: React.ReactNode;
-}
+import { IProviderProps } from './interface.provider.global';
 
 interface UserResponse {
   id: string;
@@ -46,7 +43,7 @@ interface UserContextValues {
 
 export const UserContext = createContext({} as UserContextValues);
 
-export const UserProvider = ({ children }: UserProviderProps) => {
+export const UserProvider = ({ children }: IProviderProps) => {
   const navigate = useNavigate();
   const { data: profileData, error: profileError, request: profileRequest } = useRequest<UserProfile>();
   const { error: registerError, request: registerRequest, status: registerStatus } = useRequest<UserResponse>();

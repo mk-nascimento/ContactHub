@@ -6,10 +6,7 @@ import { Endpoints, Pathnames } from 'src/enums';
 import { useRequest } from 'src/hooks/useRequest';
 import { TLoginData } from 'src/schemas';
 import axios from 'src/services/axios';
-
-interface AuthProviderChildren {
-  children: React.ReactNode;
-}
+import { IProviderProps } from './interface.provider.global';
 
 interface Authenticator {
   login(data: TLoginData): Promise<void>;
@@ -22,7 +19,7 @@ interface AuthContextsValues {
 
 export const AuthContext = createContext({} as AuthContextsValues);
 
-export const AuthProvider = ({ children }: AuthProviderChildren) => {
+export const AuthProvider = ({ children }: IProviderProps) => {
   const navigate = useNavigate();
   const { data, request, status } = useRequest<{ token: string }>();
 

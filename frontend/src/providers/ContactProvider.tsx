@@ -5,10 +5,7 @@ import { useRequest } from 'src/hooks/useRequest';
 import { Contact } from 'src/interfaces';
 import { TContactPayload } from 'src/schemas';
 import axios from 'src/services/axios';
-
-export interface ContactsProviderChildren {
-  children: React.ReactNode;
-}
+import { IProviderProps } from './interface.provider.global';
 
 interface ContactService {
   create(data: TContactPayload): Promise<void>;
@@ -33,7 +30,7 @@ interface ContactContextValues {
 
 export const ContactContext = createContext({} as ContactContextValues);
 
-export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
+export const ContactsProvider = ({ children }: IProviderProps) => {
   const { request: createRequest, status: createStatus } = useRequest<Contact>();
   const { request: updateRequest, status: updateStatus } = useRequest<Contact>();
   const { data: contactList, request: readRequest } = useRequest<Contact[]>();
