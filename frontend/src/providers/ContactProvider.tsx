@@ -2,7 +2,7 @@ import { HttpStatusCode } from 'axios';
 import { createContext, useCallback, useEffect, useMemo } from 'react';
 import { Endpoints } from 'src/enums';
 import { useRequest } from 'src/hooks/useRequest';
-import { Contact } from 'src/interfaces';
+import { IContact } from 'src/interfaces';
 import { TContactPayload } from 'src/schemas';
 import axios from 'src/services/axios';
 import { IProviderProps } from './interface.provider.global';
@@ -15,7 +15,7 @@ interface ContactService {
 }
 
 interface ReturnData {
-  contactList: Contact[];
+  contactList: IContact[];
 }
 
 interface Status {
@@ -31,9 +31,9 @@ interface ContactContextValues {
 export const ContactContext = createContext({} as ContactContextValues);
 
 export const ContactsProvider = ({ children }: IProviderProps) => {
-  const { request: createRequest, status: createStatus } = useRequest<Contact>();
-  const { request: updateRequest, status: updateStatus } = useRequest<Contact>();
-  const { data: contactList, request: readRequest } = useRequest<Contact[]>();
+  const { request: createRequest, status: createStatus } = useRequest<IContact>();
+  const { request: updateRequest, status: updateStatus } = useRequest<IContact>();
+  const { data: contactList, request: readRequest } = useRequest<IContact[]>();
   const { request: destroyRequest, status: destroyStatus } = useRequest();
 
   const create = useCallback(

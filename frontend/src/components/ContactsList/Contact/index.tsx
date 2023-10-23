@@ -1,9 +1,9 @@
 import { LiHTMLAttributes } from 'react';
-import { Contact } from 'src/interfaces';
+import { IContact } from 'src/interfaces';
 import { phoneReplaceRegex } from 'utils/string.utils';
 
 interface Props extends LiHTMLAttributes<HTMLLIElement> {
-  contact: Contact;
+  contact: IContact;
   view?: boolean;
 }
 
