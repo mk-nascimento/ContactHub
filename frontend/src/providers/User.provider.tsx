@@ -1,84 +1,66 @@
 import { HttpStatusCode } from 'axios';
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Endpoints, Pathnames } from 'src/enums';
+import { Endpoints } from 'src/enums';
+import { useAuth } from 'src/hooks/useAuth';
 import { useRequest } from 'src/hooks/useRequest';
 import { IUser, IUserProfile } from 'src/interfaces';
 import { TUserData } from 'src/schemas';
-import axios from 'src/services/axios';
 import { IProviderProps } from './interface.provider.global';
 
-interface UserService {
-  profile(): Promise<void>;
+interface IUserService {
   register(data: TUserData): Promise<void>;
+  retrieve(): Promise<void>;
   update(updateData: TUserData): Promise<void>;
   destroy(): Promise<void>;
 }
 
-interface ReturnData {
+interface IUserContextValues {
+  userService: IUserService;
   profile: IUserProfile | null;
 }
 
-interface Errors {
-  [key: string]: unknown;
-}
-
-interface UserContextValues {
-  userService: UserService;
-  data: ReturnData;
-  errors: Errors;
-}
-
-export const UserContext = createContext({} as UserContextValues);
+export const UserContext = createContext({} as IUserContextValues);
 
 export const UserProvider = ({ children }: IProviderProps) => {
-  const navigate = useNavigate();
-  const { data: profileData, error: profileError, request: profileRequest } = useRequest<IUserProfile>();
-  const { error: registerError, request: registerRequest, status: registerStatus } = useRequest<IUser>();
-  const { error: updateError, request: updateRequest } = useRequest<IUser>();
-  const { error: destroyError, request: destroyRequest } = useRequest();
+  const { request: createUser, response: crResponse } = useRequest<IUser, TUserData>();
+  const { request: retrieveUser, response: retResponse } = useRequest<IUserProfile>(true);
+  const { data: profile } = retResponse;
+  const { request: updateUser } = useRequest<IUser, Partial<TUserData>>();
+  const { request: deleteUser } = useRequest();
   const [loginPayload, setLoginPayload] = useState<Pick<TUserData, 'email' | 'password'>>();
-  const { request: login, status: loginStatus } = useRequest<{ token: string }>();
+  const { authenticator } = useAuth();
+  const { login } = authenticator;
 
   useEffect(() => {
-    if (registerStatus === HttpStatusCode.Created) login(() => axios.post(Endpoints.Login, loginPayload));
-  }, [login, loginPayload, registerStatus]);
-
-  useEffect(() => {
-    if (loginStatus === HttpStatusCode.Ok) navigate(Pathnames.Homepage);
-  }, [loginStatus, navigate]);
-
-  const profile = useCallback(async () => await profileRequest(() => axios.get(Endpoints.Profile)), [profileRequest]);
+    if (crResponse.status === HttpStatusCode.Created) login(loginPayload!);
+  }, [login, loginPayload, crResponse.status]);
 
   const register = useCallback(
     async (data: TUserData) => {
-      await registerRequest(() => axios.post(Endpoints.User, data));
+      await createUser({ method: 'POST', url: Endpoints.User, data });
       setLoginPayload({ email: data.email, password: data.password });
     },
-    [registerRequest],
+    [createUser],
   );
 
+  const retrieve = useCallback(async () => await retrieveUser({ url: Endpoints.Profile }), [retrieveUser]);
+
   const update = useCallback(
-    async (body: TUserData) => await updateRequest(() => axios.patch(`${Endpoints.User}/${profileData?.id}`, body)),
-    [profileData, updateRequest],
+    async (data: Partial<TUserData>) =>
+      await updateUser({ method: 'PATCH', url: `${Endpoints.User}/${retResponse.data?.id}`, data }),
+    [retResponse.data, updateUser],
   );
 
   const destroy = useCallback(
-    async () => await destroyRequest(() => axios.delete(`${Endpoints.User}/${profileData?.id}`)),
-    [profileData, destroyRequest],
+    async () => await deleteUser({ method: 'DELETE', url: `${Endpoints.User}/${retResponse.data?.id}` }),
+    [retResponse.data, deleteUser],
   );
 
-  const userService: UserService = useMemo(
-    () => ({ register, profile, update, destroy }),
-    [register, profile, update, destroy],
-  );
-  const data: ReturnData = useMemo(() => ({ profile: profileData }), [profileData]);
-  const errors: Errors = useMemo(
-    () => ({ profileError, registerError, updateError, destroyError }),
-    [profileError, registerError, updateError, destroyError],
+  const userService: IUserService = useMemo(
+    () => ({ register, retrieve, update, destroy }),
+    [register, retrieve, update, destroy],
   );
 
-  const values = useMemo(() => ({ data, errors, userService }), [data, errors, userService]);
-
+  const values: IUserContextValues = useMemo(() => ({ profile, userService }), [profile, userService]);
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
 };

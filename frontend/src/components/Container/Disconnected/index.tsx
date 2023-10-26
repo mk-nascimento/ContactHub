@@ -1,7 +1,8 @@
-import { useLocation } from 'react-router-dom';
-import greenLogo from '../../../assets/green.lo-go.svg';
-import whiteLogo from '../../../assets/white.lo-go.svg';
-import { Pathnames } from '../../../enums';
+import { Navigate, useLocation } from 'react-router-dom';
+import greenLogo from 'src/assets/green.lo-go.svg';
+import whiteLogo from 'src/assets/white.lo-go.svg';
+import { Pathnames } from 'src/enums';
+import { useAuth } from 'src/hooks/useAuth';
 
 interface IDisconnectedContainerProps {
   children: React.ReactNode;
@@ -9,8 +10,12 @@ interface IDisconnectedContainerProps {
 
 export const DisconnectedContainer = (props: IDisconnectedContainerProps) => {
   const { pathname }: Partial<Location> = useLocation();
-
   const isNotDashboard: boolean = pathname !== Pathnames.Dashboard;
+
+  const { authenticator } = useAuth();
+  const { token } = authenticator;
+
+  if (token) return <Navigate to={Pathnames.Homepage} />;
 
   return (
     <div className="min-h-screen md:flex md:flex-row-reverse md:bg-opacity-95 md:bg-[url('/src/assets/phone.svg')] md:bg-cover md:bg-no-repeat">

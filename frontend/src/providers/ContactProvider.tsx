@@ -1,71 +1,59 @@
-import { HttpStatusCode } from 'axios';
-import { createContext, useCallback, useEffect, useMemo } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { Endpoints } from 'src/enums';
 import { useRequest } from 'src/hooks/useRequest';
 import { IContact } from 'src/interfaces';
 import { TContactPayload } from 'src/schemas';
-import axios from 'src/services/axios';
 import { IProviderProps } from './interface.provider.global';
 
-interface ContactService {
+interface IContactService {
   create(data: TContactPayload): Promise<void>;
   read(): Promise<void>;
   update(data: TContactPayload, id: string): Promise<void>;
   destroy(id: string): Promise<void>;
 }
 
-interface ReturnData {
-  contactList: IContact[];
+interface IContactContextValues {
+  contactService: IContactService;
+  contacts: IContact[];
 }
 
-interface Status {
-  [key: string]: HttpStatusCode | undefined;
-}
-
-interface ContactContextValues {
-  contactService: ContactService;
-  data: ReturnData;
-  responseStatus: Status;
-}
-
-export const ContactContext = createContext({} as ContactContextValues);
+export const ContactContext = createContext({} as IContactContextValues);
 
 export const ContactsProvider = ({ children }: IProviderProps) => {
-  const { request: createRequest, status: createStatus } = useRequest<IContact>();
-  const { request: updateRequest, status: updateStatus } = useRequest<IContact>();
-  const { data: contactList, request: readRequest } = useRequest<IContact[]>();
-  const { request: destroyRequest, status: destroyStatus } = useRequest();
+  const { request: createContact, response: crResponse } = useRequest<IContact, TContactPayload>();
+  const { request: updateContact, response: updResponse } = useRequest<IContact, Partial<TContactPayload>>();
+  const { request: retrieveAll, response: retResponse } = useRequest<IContact[]>(true);
+  const { data: contacts } = retResponse;
+  const { request: destroyContact, response: delResponse } = useRequest();
+  const [status] = useState(crResponse.status ?? updResponse.status ?? delResponse.status);
 
   const create = useCallback(
-    async (contactDataPayload: TContactPayload) => await createRequest(() => axios.post(Endpoints.Contact, contactDataPayload)),
-    [createRequest],
+    async (data: TContactPayload) => await createContact({ method: 'POST', url: Endpoints.Contact, data }),
+    [createContact],
   );
 
-  const read = useCallback(async () => await readRequest(() => axios.get(Endpoints.Contact)), [readRequest]);
+  const read = useCallback(async () => await retrieveAll({ url: Endpoints.Contact }), [retrieveAll]);
 
   const update = useCallback(
-    async (contactDataPayload: TContactPayload, id: string) =>
-      await updateRequest(() => axios.patch(`${Endpoints.Contact}/${id}}`, contactDataPayload)),
-    [updateRequest],
+    async (data: Partial<TContactPayload>, id: string) =>
+      await updateContact({ method: 'PATCH', url: `${Endpoints.Contact}/${id}}`, data }),
+    [updateContact],
   );
 
   const destroy = useCallback(
-    async (id: string) => await destroyRequest(() => axios.delete(`${Endpoints.Contact}/${id}`)),
-    [destroyRequest],
+    async (id: string) => await destroyContact({ method: 'DELETE', url: `${Endpoints.Contact}/${id}` }),
+    [destroyContact],
   );
 
   useEffect(() => {
-    if (createStatus || updateStatus || destroyStatus) (async () => await read())();
-  }, [createStatus, destroyStatus, updateStatus, read]);
+    if (status) (async () => await read())();
+  }, [status, read]);
 
-  const contactService: ContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
-  const data: ReturnData = useMemo(() => ({ contactList: contactList ?? [] }), [contactList]);
-  const responseStatus: Status = useMemo(
-    () => ({ createStatus, updateStatus, destroyStatus }),
-    [createStatus, updateStatus, destroyStatus],
+  const contactService: IContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
+
+  const values: IContactContextValues = useMemo(
+    () => ({ contacts: contacts ?? [], contactService }),
+    [contacts, contactService],
   );
-
-  const values = useMemo(() => ({ contactService, data, responseStatus }), [contactService, data, responseStatus]);
-
   return <ContactContext.Provider value={values}>{children}</ContactContext.Provider>;
 };

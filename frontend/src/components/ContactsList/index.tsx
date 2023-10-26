@@ -8,10 +8,8 @@ interface Props extends HTMLAttributes<HTMLUListElement> {
 }
 
 export const ContactList = ({ view, ...props }: Props) => {
-  const {
-    data: { contactList },
-    contactService: { read },
-  } = useContact();
+  const { contacts, contactService } = useContact();
+  const { read } = contactService;
 
   useEffect(() => {
     (async () => await read())();
@@ -40,7 +38,7 @@ export const ContactList = ({ view, ...props }: Props) => {
       </div>
 
       <ul {...props} className='flex flex-col gap-[16px] md:gap-[24px]'>
-        {contactList.map((cont) => (
+        {contacts.map((cont) => (
           <ContactCard contact={cont} key={cont.id} view={view} />
         ))}
       </ul>

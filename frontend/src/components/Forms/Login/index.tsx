@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { Pathnames } from '../../../enums';
-import { useAuth } from '../../../hooks/useAuth';
-import { TLoginData, loginSchema } from '../../../schemas';
-import { GradientButton } from '../../Buttons/Gradient';
+import { GradientButton } from 'src/components/Buttons/Gradient';
+import { Pathnames } from 'src/enums';
+import { useAuth } from 'src/hooks/useAuth';
+import { TLoginData, loginSchema } from 'src/schemas';
 import { Input } from '../Input';
 
 export const LoginForm = () => {
