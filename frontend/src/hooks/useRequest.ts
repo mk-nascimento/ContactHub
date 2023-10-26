@@ -12,7 +12,6 @@ enum ActionTypes {
 interface IRequestResponse<T> {
   data: T | null;
   error: unknown;
-  loading: boolean;
   status?: HttpStatusCode;
 }
 
@@ -30,7 +29,7 @@ interface IAxiosRequestConfig<B> extends AxiosRequestConfig<B> {
 const reducer = <T>(state: IRequestResponse<T>, action: IAction<T>): IRequestResponse<T> => {
   switch (action.type) {
     case ActionTypes.START:
-      return { ...state, loading: true };
+      return { ...state };
     case ActionTypes.SUCCESS:
       return { ...state, data: action.data ?? null, status: action.status };
     case ActionTypes.ERROR:
@@ -48,7 +47,7 @@ const reducer = <T>(state: IRequestResponse<T>, action: IAction<T>): IRequestRes
  *
  * @example
  * // Example usage in a React component
- * const { loading, data, error, status, request } = useRequest<ResponseType, RequestBodyType>();
+ * const { request, response } = useRequest<ResponseType, RequestBodyType>();
  *
  * useEffect(() => {
  *   // Make an asynchronous request when the component mounts
@@ -61,10 +60,10 @@ const reducer = <T>(state: IRequestResponse<T>, action: IAction<T>): IRequestRes
  *   });
  * }, []);
  *
- * @returns An object that contains the `loading`, `data`, `error`, `status` and `request` function.
+ * @returns An object that contains the `request` function and `response` object.
  */
 export const useRequest = <T, B = undefined>(silent: boolean = false) => {
-  const [response, dispatch] = useReducer(reducer<T>, { data: null, error: null, loading: false });
+  const [response, dispatch] = useReducer(reducer<T>, { data: null, error: null });
 
   /**
    * Makes an asynchronous HTTP request using Axios.
@@ -95,5 +94,5 @@ export const useRequest = <T, B = undefined>(silent: boolean = false) => {
     [silent],
   );
 
-  return { response, request };
+  return { request, response };
 };
