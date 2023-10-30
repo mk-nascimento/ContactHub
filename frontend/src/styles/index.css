@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply box-border;
+    @apply box-border scrollbar-thin scrollbar-track-grey-50 scrollbar-thumb-grey-200 scrollbar-track-rounded-lg scrollbar-thumb-rounded-lg hover:scrollbar-thumb-grey-300;
   }
 
   body {

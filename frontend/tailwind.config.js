@@ -34,6 +34,6 @@ export default {
       },
     },
   },
-  variants: { scrollbar: ['rounded'] },
-  plugins: [],
+  // eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
+  plugins: [require('tailwind-scrollbar')({ nocompatible: true })],
 };
