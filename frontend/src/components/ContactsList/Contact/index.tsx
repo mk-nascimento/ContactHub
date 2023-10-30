@@ -14,11 +14,9 @@ export const ContactCard = ({ contact, view, ...rest }: Props) => (
       !view ? 'cursor-pointer hover:scale-[1.01] hover:shadow-sm hover:shadow-brand-300' : 'cursor-not-allowed select-none'
     }`.trim()}
   >
-    <p className='truncate pl-[16px] pr-[8px]'>{contact.full_name ?? 'full name'}</p>
-    <p className='hidden truncate pr-[8px] sm:block'>{contact.phone.replace(...phoneReplaceRegex) ?? '(**) *****-****'}</p>
-    <p className='truncate pr-[16px] lowercase md:pr-[8px]'>{contact.email ?? 'mail@mail.com'}</p>
-    <p className='hidden truncate pr-[16px] md:block'>
-      {new Date(contact.created_at).toLocaleDateString('pt-BR') ?? '01/01/1999'}
-    </p>
+    <p className='truncate pl-[16px] pr-[8px]'>{contact.full_name}</p>
+    <p className='hidden truncate pr-[8px] sm:block'>{contact.phone.replace(...phoneReplaceRegex)}</p>
+    <p className='truncate pr-[16px] lowercase md:pr-[8px]'>{contact.email}</p>
+    <p className='hidden truncate pr-[16px] md:block'>{new Date(contact.created_at).toLocaleDateString('pt-BR')}</p>
   </li>
 );
