@@ -18,8 +18,8 @@ export const Profile = () => {
 
   return (
     <MainContainer>
-      <div className='tw-authenticated-page-main-child user-info-container flex h-fit w-full flex-col'>
-        <div className='tw-authenticated-page-main-child__content flex flex-col gap-[16px] px-[16px] pb-[16px]'>
+      <div className='tw-authenticated-main-child user-info-container flex shrink-0 grow-0 basis-auto flex-col'>
+        <div className='tw-authenticated-main-child__content flex flex-col gap-[16px] px-[16px] pb-[16px]'>
           {info && <h3 className='text-18-600 truncate text-center capitalize text-grey-800 underline'>{info.full_name}</h3>}
           {!profile && <Skeleton />}
           <div className='flex flex-col gap-[16px] md:flex-row md:items-center md:justify-between '>

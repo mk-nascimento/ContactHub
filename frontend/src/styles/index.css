@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply box-border scrollbar-thin scrollbar-track-grey-50 scrollbar-thumb-grey-200 scrollbar-track-rounded-lg scrollbar-thumb-rounded-lg hover:scrollbar-thumb-grey-300;
+    @apply m-0 box-border p-0 scrollbar-thin scrollbar-track-grey-50 scrollbar-thumb-grey-200 scrollbar-track-rounded-lg scrollbar-thumb-rounded-lg hover:scrollbar-thumb-grey-300;
   }
 
   body {
@@ -67,7 +67,7 @@
   .tw-aside-options {
     @apply flex cursor-pointer items-center gap-[8px] underline;
   }
-  .tw-authenticated-page-main-child {
+  .tw-authenticated-main-child {
     @apply gap-[32px] rounded-[16px] bg-grey-100 p-[16px] shadow-lg shadow-brand-100;
   }
   .new-input {

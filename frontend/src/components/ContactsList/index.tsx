@@ -16,7 +16,7 @@ export const ContactList = ({ view, ...props }: Props) => {
   }, [read]);
 
   return (
-    <div className='tw-authenticated-page-main-child contact-list-container flex h-full w-full flex-col'>
+    <div className='tw-authenticated-main-child contact-list-container flex flex-1 flex-col overflow-hidden'>
       <div className='flex flex-col gap-[12px] px-[16px]'>
         <button
           disabled={view}
@@ -37,7 +37,7 @@ export const ContactList = ({ view, ...props }: Props) => {
         </div>
       </div>
 
-      <ul {...props} className='flex flex-col gap-[16px] md:gap-[24px]'>
+      <ul {...props} className='flex flex-col gap-[16px] overflow-y-auto pb-[8px] md:gap-[24px]'>
         {contacts.map((cont) => (
           <ContactCard contact={cont} key={cont.id} view={view} />
         ))}
