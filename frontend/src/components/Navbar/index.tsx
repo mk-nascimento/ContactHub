@@ -1,18 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { GiHamburgerMenu } from 'react-icons/gi';
 import { IoCloseSharp } from 'react-icons/io5';
 import namedIcon from 'src/assets/named-icon.svg';
 
 interface NavbarProps {
-  setter: React.Dispatch<React.SetStateAction<boolean>>;
+  sidebarStates: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }
 
-export const Navbar = ({ setter }: NavbarProps) => {
-  const [showSidebar, setShowSidebar] = useState(false);
+export const Navbar = ({ sidebarStates }: NavbarProps) => {
+  const [showSidebar, setShowSidebar] = sidebarStates;
 
   const toggleIcon = useMemo(() => (showSidebar ? <IoCloseSharp /> : <GiHamburgerMenu />), [showSidebar]);
   const toggleSidebar = () => {
-    setter((prev) => !prev);
     setShowSidebar((prev) => !prev);
   };
 

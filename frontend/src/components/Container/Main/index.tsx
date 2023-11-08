@@ -1,50 +1,90 @@
-import { useState } from 'react';
-import { BsGrid1X2Fill, BsPersonFillGear, BsPersonFillX, BsPersonLinesFill } from 'react-icons/bs';
+import { useEffect, useState } from 'react';
+import { BsFillShieldLockFill, BsGrid1X2Fill, BsPersonFillGear, BsPersonFillX, BsPersonLinesFill } from 'react-icons/bs';
 import { IoLogOutSharp } from 'react-icons/io5';
+import { Link, useLocation } from 'react-router-dom';
 import { Navbar } from 'src/components/Navbar';
+import { Skeleton } from 'src/components/Skeleton';
+import { Pathnames } from 'src/enums';
 import { useAuth } from 'src/hooks/useAuth';
+import { useUser } from 'src/hooks/useUser';
 
 interface MainContainerProps {
   children?: React.ReactNode;
+  setModalMode?: React.Dispatch<React.SetStateAction<'info' | 'pass' | 'delete' | undefined>>;
 }
 
-export const MainContainer = ({ children }: MainContainerProps) => {
+export const MainContainer = ({ setModalMode, children }: MainContainerProps) => {
+  const { pathname }: Partial<Location> = useLocation();
+  const isProfilePage = pathname === Pathnames.Profile;
+
   const [showSidebar, setShowSidebar] = useState(false);
 
-  const {
-    authenticator: { logout },
-  } = useAuth();
+  const { authenticator } = useAuth();
+  const { profile, userService } = useUser();
+  const { logout } = authenticator;
+  const { retrieve } = userService;
+
+  const handleEdit = (mode: 'info' | 'pass' | 'delete') => {
+    setShowSidebar(false);
+    setModalMode!(mode);
+  };
+
+  const handleDestroy = () => {
+    setShowSidebar(false);
+    setModalMode!('delete');
+  };
+
+  useEffect(() => {
+    const loadProfile = async () => await retrieve();
+    if (!profile) loadProfile();
+  }, [profile, retrieve]);
+
   return (
     <>
-      <Navbar setter={setShowSidebar} />
+      <Navbar sidebarStates={[showSidebar, setShowSidebar]} />
       <div className="main-container h-screen w-full bg-[url('/src/assets/phone.svg')] bg-cover pt-[64px]">
-        <div className='main-container__opacity flex h-full w-full bg-grey-50/75'>
+        <div className='opacity-cover flex h-full w-full bg-grey-50/75'>
           <aside
-            className={`absolute z-[1] flex h-[calc(100%-64px)] w-[192.5px] flex-col justify-between border-r-[0.5px] border-brand-100 bg-grey-100 px-[32px] py-[32px] capitalize text-brand-300 transition-transform md:static md:h-full md:w-[268.5px] ${
+            className={`absolute z-[1] flex min-h-[calc(100%-64px)] w-[192.5px] flex-col justify-between border-r-[0.5px] border-brand-100 bg-grey-100 p-[32px] capitalize text-brand-300 transition-transform md:static md:min-h-full md:w-[268.5px] md:py-[64px] ${
               showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
             }`.trim()}
           >
             <div className='aside-top flex flex-col gap-[16px]'>
               <h2 className='text-brand-gradient text-18-600 md:text-24-600'>
-                olá, <span className='underline decoration-brand-100'>{'Mary'}</span>
+                olá, {profile && <span className='underline decoration-brand-100'>{profile.full_name.split(' ')[0]}</span>}
+                {!profile && <Skeleton />}
               </h2>
               <ul className='text-14-700 md:text-20-600 flex flex-col gap-[20px] underline'>
                 <li className='tw-aside-options'>
                   <BsGrid1X2Fill />
-                  <span>dashboard</span>
+                  <Link to={Pathnames.Homepage}>dashboard</Link>
                 </li>
                 <li className='tw-aside-options'>
                   <BsPersonLinesFill />
-                  <span>perfil</span>
+                  <Link to={Pathnames.Profile}>perfil</Link>
                 </li>
-                <li className='tw-aside-options'>
-                  <BsPersonFillGear />
-                  <span>editar perfil</span>
-                </li>
-                <li className='tw-aside-options'>
-                  <BsPersonFillX />
-                  <span>excluir conta</span>
-                </li>
+                {isProfilePage && (
+                  <>
+                    <li>
+                      <button className='tw-aside-options capitalize' onClick={() => handleEdit('info')}>
+                        <BsPersonFillGear />
+                        <span>editar perfil</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button className='tw-aside-options capitalize' onClick={() => handleEdit('pass')}>
+                        <BsFillShieldLockFill />
+                        <span>atualizar senha</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button className='tw-aside-options capitalize' onClick={handleDestroy}>
+                        <BsPersonFillX />
+                        <span>excluir conta</span>
+                      </button>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
             <button className='tw-aside-options text-14-700 md:text-20-600 h-fit capitalize' onClick={logout}>
