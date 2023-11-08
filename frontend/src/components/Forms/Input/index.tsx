@@ -1,5 +1,6 @@
-import { InputHTMLAttributes } from 'react';
+import { HTMLInputTypeAttribute, InputHTMLAttributes } from 'react';
 import { FieldError, UseFormRegisterReturn } from 'react-hook-form';
+import { phoneMask } from 'utils/string.utils';
 
 interface IInputFields {
   className: string;
@@ -7,7 +8,7 @@ interface IInputFields {
   label: string;
   name: string;
   placeholder: string;
-  type: string;
+  type: HTMLInputTypeAttribute;
 }
 
 interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -17,33 +18,14 @@ interface IInputProps extends InputHTMLAttributes<HTMLInputElement> {
   register?: UseFormRegisterReturn<string>;
 }
 
-export const Input = ({
-  error,
-  fields,
-  label,
-  register,
-  ...rest
-}: IInputProps) => {
+export const Input = ({ error, fields, label, register, ...rest }: IInputProps) => {
+  const className = `new-input mt-[10px] ${fields?.className ?? ''} ${rest.className ?? ''}`.trim().replace(/\s+/g, ' ');
+  const mask = (e: React.FormEvent<HTMLInputElement>) => (e.currentTarget.type === 'tel' ? phoneMask(e) : undefined);
+
   return (
-    <label
-      className='relative text-14-400 text-grey-600 cursor-pointer'
-      htmlFor={rest.id}
-    >
-      {fields?.label ?? label ?? 'Insert label'}{' '}
-      <span className='inline-flex text-input-alert'>
-        * {error ? error.message : null}{' '}
-      </span>{' '}
-      <input
-        {...rest}
-        {...register}
-        className={`new-input mt-[10px]
-        ${fields?.className ?? ''}
-        ${rest.className ?? ''}`.trim()}
-        id={fields?.id ?? rest.id ?? undefined}
-        name={fields?.name ?? rest.name ?? undefined}
-        placeholder={fields?.placeholder ?? rest.placeholder ?? undefined}
-        type={fields?.type ?? rest.type ?? 'text'}
-      />
+    <label className='text-14-400 relative cursor-pointer text-grey-600' htmlFor={rest.id}>
+      {fields?.label ?? label} <span className='inline-flex text-input-alert'>* {error ? error.message : null} </span>{' '}
+      <input {...fields} {...rest} {...register} className={className} onInput={mask} />
     </label>
   );
 };

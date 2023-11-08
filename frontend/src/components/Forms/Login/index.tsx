@@ -21,7 +21,7 @@ export const LoginForm = () => {
   return (
     <form onSubmit={handleSubmit(login)} className='tw-user-forms'>
       <div className='tw-user-forms__header'>
-        <h1 className='tw-user-forms__title'>Crie sua conta</h1>
+        <h1 className='tw-user-forms__title'>Login</h1>
 
         <p className='tw-user-forms__tips'>
           Ainda não possui uma conta?{' '}
@@ -35,8 +35,6 @@ export const LoginForm = () => {
         label='Email'
         className='new-input block w-full'
         error={errors.email}
-        id='email'
-        name='email'
         placeholder='mail@mail.com'
         register={register('email')}
         type='email'
@@ -46,8 +44,6 @@ export const LoginForm = () => {
         label='Senha'
         className='new-input block w-full'
         error={errors.password}
-        id='password'
-        name='password'
         placeholder='********'
         register={register('password')}
         type='password'
