@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BsFillShieldLockFill, BsGrid1X2Fill, BsPersonFillGear, BsPersonFillX, BsPersonLinesFill } from 'react-icons/bs';
 import { IoLogOutSharp } from 'react-icons/io5';
 import { Link, useLocation } from 'react-router-dom';
+import { TProfileModalMode } from 'src/components/Forms/Profile/profile.interface';
 import { Navbar } from 'src/components/Navbar';
 import { Skeleton } from 'src/components/Skeleton';
 import { Pathnames } from 'src/enums';
@@ -10,10 +11,10 @@ import { useUser } from 'src/hooks/useUser';
 
 interface MainContainerProps {
   children?: React.ReactNode;
-  setModalMode?: React.Dispatch<React.SetStateAction<'info' | 'pass' | 'delete' | undefined>>;
+  modalModeStates?: [string | undefined, React.Dispatch<React.SetStateAction<string | undefined>>];
 }
 
-export const MainContainer = ({ setModalMode, children }: MainContainerProps) => {
+export const MainContainer = ({ modalModeStates, children }: MainContainerProps) => {
   const { pathname }: Partial<Location> = useLocation();
   const isProfilePage = pathname === Pathnames.Profile;
 
@@ -24,15 +25,7 @@ export const MainContainer = ({ setModalMode, children }: MainContainerProps) =>
   const { logout } = authenticator;
   const { retrieve } = userService;
 
-  const handleEdit = (mode: 'info' | 'pass' | 'delete') => {
-    setShowSidebar(false);
-    setModalMode!(mode);
-  };
-
-  const handleDestroy = () => {
-    setShowSidebar(false);
-    setModalMode!('delete');
-  };
+  const handleChanges = (mode: TProfileModalMode) => modalModeStates![1](mode);
 
   useEffect(() => {
     const loadProfile = async () => await retrieve();
@@ -66,19 +59,19 @@ export const MainContainer = ({ setModalMode, children }: MainContainerProps) =>
                 {isProfilePage && (
                   <>
                     <li>
-                      <button className='tw-aside-options capitalize' onClick={() => handleEdit('info')}>
+                      <button className='tw-aside-options capitalize' onClick={() => handleChanges('info')}>
                         <BsPersonFillGear />
                         <span>editar perfil</span>
                       </button>
                     </li>
                     <li>
-                      <button className='tw-aside-options capitalize' onClick={() => handleEdit('pass')}>
+                      <button className='tw-aside-options capitalize' onClick={() => handleChanges('pass')}>
                         <BsFillShieldLockFill />
                         <span>atualizar senha</span>
                       </button>
                     </li>
                     <li>
-                      <button className='tw-aside-options capitalize' onClick={handleDestroy}>
+                      <button className='tw-aside-options capitalize' onClick={() => handleChanges('delete')}>
                         <BsPersonFillX />
                         <span>excluir conta</span>
                       </button>

@@ -12,9 +12,9 @@ import { handleProfilePdf } from 'utils/profile.pdf';
 export const Profile = () => {
   const { profile } = useUser();
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [modalMode, setModalMode] = useState<'info' | 'pass' | 'delete'>();
+  const [modalMode, setModalMode] = useState<string>();
 
-  const renderEditForm = useMemo(() => {
+  const renderModalContent = useMemo(() => {
     switch (modalMode) {
       case 'info':
         return <InfoForm modalControl={() => setOpenModal(false)} />;
@@ -34,7 +34,7 @@ export const Profile = () => {
 
   return (
     <>
-      <MainContainer setModalMode={setModalMode}>
+      <MainContainer modalModeStates={[modalMode, setModalMode]}>
         <div className='tw-authenticated-main-child user-info-container flex shrink-0 grow-0 basis-auto flex-col'>
           <div className='tw-authenticated-main-child__content flex flex-col gap-[16px] px-[16px] pb-[16px]'>
             {profile && (
@@ -64,7 +64,7 @@ export const Profile = () => {
         </div>
         <ContactList view />
       </MainContainer>
-      <Modal statePair={[openModal, setOpenModal]}>{renderEditForm}</Modal>
+      <Modal statePair={[openModal, setOpenModal]}>{renderModalContent}</Modal>
     </>
   );
 };

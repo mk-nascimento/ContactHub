@@ -27,5 +27,3 @@ export const phoneMask = (event: React.FormEvent<HTMLInputElement>): React.FormE
 
   return event;
 };
-
-export const phoneReplaceRegex: [RegExp, string] = [/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3'];

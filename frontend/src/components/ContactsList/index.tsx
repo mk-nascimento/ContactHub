@@ -1,14 +1,16 @@
 import { HTMLAttributes, useEffect } from 'react';
 import { BsPersonPlus } from 'react-icons/bs';
 import { useContact } from 'src/hooks/useContact';
-import { ContactCard } from './Contact';
+import { ContactItem } from './ContactItem';
 
 interface Props extends HTMLAttributes<HTMLUListElement> {
   view?: boolean;
 }
 
 export const ContactList = ({ view, ...props }: Props) => {
-  const { contacts, contactService } = useContact();
+  const { createModalStates, contacts, contactService, highlightedStates } = useContact();
+  const { '1': setCreateModal } = createModalStates;
+  const { '1': setHighlightedContact } = highlightedStates;
   const { read } = contactService;
 
   useEffect(() => {
@@ -24,7 +26,10 @@ export const ContactList = ({ view, ...props }: Props) => {
             view
               ? 'border-transparent text-transparent opacity-0'
               : 'border-brand-300 text-brand-300 hover:bg-brand-300 hover:text-grey-50 focus:border-brand-100 focus:bg-brand-100 focus:text-brand-300'
-          } self-end rounded-[8px] border p-[8px] text-center`.trim()}
+          } self-end rounded-[8px] border p-[8px] text-center`
+            .trim()
+            .replace(/\s+/g, ' ')}
+          onClick={() => setCreateModal(true)}
         >
           <BsPersonPlus />
         </button>
@@ -38,9 +43,18 @@ export const ContactList = ({ view, ...props }: Props) => {
       </div>
 
       <ul {...props} className='flex flex-col gap-[16px] overflow-y-auto pb-[8px] md:gap-[24px]'>
-        {contacts.map((cont) => (
-          <ContactCard contact={cont} key={cont.id} view={view} />
-        ))}
+        {contacts.length ? (
+          contacts.map((cont) => (
+            <ContactItem
+              contact={cont}
+              key={cont.id}
+              view={view}
+              onClick={view ? undefined : () => setHighlightedContact(cont)}
+            />
+          ))
+        ) : (
+          <li className='text-14-400 rounded-[6px] px-[16px] text-center'>Você ainda não possui contatos cadastrados...</li>
+        )}
       </ul>
     </div>
   );
