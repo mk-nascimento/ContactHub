@@ -2,60 +2,51 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { IoClose } from 'react-icons/io5';
 
-import { useContact } from '../../hooks/useContact';
-import { useUser } from '../../hooks/useUser';
-
-interface Props {
+interface IModalProps {
   children?: React.ReactNode;
+  statePair: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }
+export const Modal = ({ children, statePair }: IModalProps) => {
+  const [open, setOpen] = statePair;
+  const dialog = useRef<HTMLDialogElement>(null);
+  const div = useRef<HTMLDivElement>(null);
 
-export const CustomModal = ({ children }: Props) => {
-  const {
-    isOpenModal: editContact,
-    setIsOpenModal: setEditContact,
-    deleteContactModal,
-    setDeleteContactModal,
-    addContactModal,
-    setAddContactModal,
-  } = useContact();
-  const { isOpenModal: editProfile, setIsOpenModal: setEditProfile, deleteProfileModal, setDeleteProfileModal } = useUser();
-
-  const ref = useRef<HTMLDivElement>(null);
-  const open: boolean = addContactModal || deleteProfileModal || deleteContactModal || editContact || editProfile;
-
-  const closeModal = () => (
-    setAddContactModal(false), setDeleteProfileModal(false), setDeleteContactModal(false), setEditContact(false), setEditProfile(false)
-  );
+  const closeModal = () => {
+    setOpen(false);
+    dialog.current?.close();
+  };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!ref.current || !event.target) return;
-
-      if (!(event.target instanceof Node) || !ref.current.contains(event.target)) closeModal();
+    const handleOutClick = (event: MouseEvent) => {
+      if (!div.current || !event.target) return;
+      if (!(event.target instanceof Node) || !div.current.contains(event.target)) closeModal();
     };
+    if (dialog) window.addEventListener('mousedown', handleOutClick);
 
-    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleOutClick);
+  });
 
-    return () => {
-      window.removeEventListener('mousedown', handleClickOutside);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => {
+    if (open && dialog.current) dialog.current.showModal();
+  }, [open]);
 
   return createPortal(
     <>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-80 bg-gray-900 transition-opacity">
-          <div ref={ref} className="relative p-0 rounded-lg shadow-lg animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <dialog
+          ref={dialog}
+          className='w-11/12 max-w-sm rounded-[8px] border-none outline-none backdrop:bg-brand-neutral backdrop:bg-opacity-75 lg:max-w-md'
+        >
+          <div ref={div} className='relative w-full rounded-[8px] bg-grey-100 p-[32px] shadow-lg shadow-brand-100'>
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 text-xl text-gray-50 hover:text-pink-500 transition-colors duration-500 animate-pulse"
+              className='absolute right-4 top-4 animate-pulse text-xl text-brand-100 transition-colors duration-500 hover:animate-none hover:text-brand-300'
             >
               <IoClose />
             </button>
             {children}
           </div>
-        </div>
+        </dialog>
       )}
     </>,
     document.body,

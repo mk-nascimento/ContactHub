@@ -1,58 +1,48 @@
-import { AxiosError } from 'axios';
-import React, { createContext, useEffect } from 'react';
-import { NavigateFunction, useLocation, useNavigate } from 'react-router-dom';
+import { HttpStatusCode } from 'axios';
+import Cookies from 'js-cookie';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
+import { AppVariables, Endpoints } from 'src/enums';
+import { useRequest } from 'src/hooks/useRequest';
+import { TLoginData } from 'src/schemas';
+import { IProviderProps } from './interface.provider.global';
 
-import { TLoginData } from '../schemas';
-import api from '../services/axios';
-
-export interface AuthContextsValues {
-  login: (data: TLoginData) => Promise<void>;
-  logout: () => Promise<void>;
+interface Authenticator {
+  login(data: TLoginData): Promise<void>;
+  logout(): void;
+  token?: string;
 }
 
-export interface AuthProviderChildren {
-  children: React.ReactNode;
-}
-interface LoginResponse {
-  token: string;
+interface AuthContextsValues {
+  authenticator: Authenticator;
 }
 
 export const AuthContext = createContext({} as AuthContextsValues);
-
-export const AuthProvider = ({ children }: AuthProviderChildren) => {
-  const navigate: NavigateFunction = useNavigate();
-  const { pathname }: Partial<Location> = useLocation();
-  const token: string | null = localStorage.getItem('@fullstack-challenge:token');
+export const AuthProvider = ({ children }: IProviderProps) => {
+  const [authToken, setAuthToken] = useState<string | undefined>(Cookies.get(AppVariables.KeyToken));
+  const { request: req, response } = useRequest<{ token: string }, TLoginData>();
+  const { data, status } = response;
 
   useEffect(() => {
-    if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    if (status === HttpStatusCode.Ok) setAuthToken(data?.token);
+  }, [data, status]);
 
-    (async () => {
-      try {
-        await api.get('auth/validate/');
-      } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
-      }
-    })();
-  }, [navigate, pathname, token]);
+  useEffect(() => {
+    if (authToken) Cookies.set(AppVariables.KeyToken, authToken, { secure: true, sameSite: 'Lax' });
+    else Cookies.remove(AppVariables.KeyToken);
+  }, [authToken]);
 
-  const login = async (data: TLoginData): Promise<void> => {
-    try {
-      const response = await api.post<LoginResponse>('auth/login/', data);
+  const login = useCallback(
+    (data: TLoginData) => req({ method: 'POST', url: Endpoints.Login, data }, 'Login successful'),
+    [req],
+  );
+  const logout = useCallback(() => {
+    setAuthToken(undefined);
+    toast.warning('Your session was disconnected', { autoClose: 1500 });
+  }, []);
 
-      const { token } = response.data;
+  const authenticator: Authenticator = useMemo(() => ({ login, logout, token: authToken }), [login, logout, authToken]);
 
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-      localStorage.setItem('@fullstack-challenge:token', token);
-
-      if (token) navigate('dashboard');
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const logout = async () => (localStorage.clear(), navigate('/'));
-
-  const values = { login, logout };
+  const values: AuthContextsValues = useMemo(() => ({ authenticator }), [authenticator]);
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>;
 };

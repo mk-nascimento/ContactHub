@@ -1,160 +1,72 @@
-import { AxiosError } from 'axios';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { createContext, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { HttpStatusCode } from 'axios';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { Endpoints } from 'src/enums';
+import { useAuth } from 'src/hooks/useAuth';
+import { useRequest } from 'src/hooks/useRequest';
+import { IUser, IUserProfile } from 'src/interfaces';
+import { TUserData } from 'src/schemas';
+import { IProviderProps } from './interface.provider.global';
 
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
-
-import { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { Contact } from '../interfaces/global.interfaces';
-import { TUserData } from '../schemas';
-import api from '../services/axios';
-
-interface UserContextValues {
-  getProfile: () => Promise<void>;
-  registerUser: (data: TUserData) => Promise<void>;
-  updateUser: (data: TUserData) => void;
-  deleteUser: () => Promise<void>;
-  isOpenModal: boolean;
-  setIsOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  profile: UserProfile | undefined;
-  exportProfile: (data: UserProfile) => void;
-  deleteProfileModal: boolean;
-  setDeleteProfileModal: React.Dispatch<React.SetStateAction<boolean>>;
+interface IUserService {
+  register(data: TUserData): Promise<void>;
+  retrieve(): Promise<void>;
+  update(updateData: Partial<TUserData>): Promise<void>;
+  destroy(): Promise<void>;
 }
 
-interface UserProviderProps {
-  children: React.ReactNode;
+interface IUserContextValues {
+  userService: IUserService;
+  profile: IUserProfile | null;
 }
 
-interface UserResponse {
-  id: string;
-  full_name: string;
-  email: string;
-  created_at: Date;
-  role: 'client' | 'admin';
-}
+export const UserContext = createContext({} as IUserContextValues);
 
-interface UserProfile extends UserResponse {
-  contacts: Contact[];
-}
-
-export const UserContext = createContext({} as UserContextValues);
-
-export const UserProvider = ({ children }: UserProviderProps) => {
-  const navigate = useNavigate();
-  const { pathname }: Partial<Location> = useLocation();
-  const [deleteProfileModal, setDeleteProfileModal] = useState<boolean>(false);
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
-  const [profile, setProfile] = useState<UserProfile>();
-  const token: string | null = localStorage.getItem('@fullstack-challenge:token');
+export const UserProvider = ({ children }: IProviderProps) => {
+  const { request: createUser, response: crResponse } = useRequest<IUser, TUserData>();
+  const { request: retrieveUser, response: retResponse } = useRequest<IUserProfile>(true);
+  const { data: profile } = retResponse;
+  const { request: updateUser, response: updResponse } = useRequest<IUser, Partial<TUserData>>();
+  const { request: deleteUser, response: delResponse } = useRequest();
+  const [loginPayload, setLoginPayload] = useState<Pick<TUserData, 'email' | 'password'>>();
+  const { authenticator } = useAuth();
+  const { login, logout } = authenticator;
 
   useEffect(() => {
-    if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    if (crResponse.status === HttpStatusCode.Created) login(loginPayload!);
+  }, [login, loginPayload, crResponse.status]);
+  useEffect(() => {
+    if (delResponse.status === HttpStatusCode.NoContent) logout();
+  }, [logout, delResponse.status]);
 
-    const validate = async () => {
-      try {
-        await api.get('auth/validate/');
-      } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 401 && (pathname === '/dashboard' || pathname === '/profile')) navigate('/');
-      }
-    };
-    if (api.defaults.headers.common.Authorization) validate();
+  const register = useCallback(
+    async (data: TUserData) => {
+      await createUser({ method: 'POST', url: Endpoints.User, data });
+      setLoginPayload({ email: data.email, password: data.password });
+    },
+    [createUser],
+  );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  const retrieve = useCallback(async () => await retrieveUser({ url: Endpoints.Profile }), [retrieveUser]);
+  useEffect(() => {
+    if (updResponse.status === HttpStatusCode.Ok) retrieve();
+  }, [retrieve, updResponse.status]);
 
-  const getProfile = async () => {
-    try {
-      const { data, status } = await api.get<UserProfile>('profile/');
-      if (status === 200) setProfile((prev) => (prev !== data ? data : profile));
-    } catch (error) {
-      if (error instanceof AxiosError) navigate('/dashboard');
-    }
-  };
+  const update = useCallback(
+    async (data: Partial<TUserData>) =>
+      await updateUser({ method: 'PATCH', url: `${Endpoints.User}/${retResponse.data?.id}`, data }),
+    [retResponse.data, updateUser],
+  );
 
-  const registerUser = async (data: TUserData) => {
-    try {
-      const response = await api.post<UserResponse>('users/', data);
-      const { id } = response.data;
-      if (id) {
-        const loginResponse = await api.post<{ token: string }>('auth/login/', data);
+  const destroy = useCallback(
+    async () => await deleteUser({ method: 'DELETE', url: `${Endpoints.User}/${retResponse.data?.id}` }),
+    [retResponse.data, deleteUser],
+  );
 
-        const { token } = loginResponse.data;
+  const userService: IUserService = useMemo(
+    () => ({ register, retrieve, update, destroy }),
+    [register, retrieve, update, destroy],
+  );
 
-        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-        localStorage.setItem('@fullstack-challenge:token', token);
-
-        if (token) navigate('dashboard');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const updateUser = async (updateData: TUserData) => {
-    try {
-      const { status } = await api.patch<UserResponse>(`users/${profile?.id}`, updateData);
-      if (status === 200) setIsOpenModal(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const deleteUser = async () => {
-    try {
-      await api.delete(`users/${profile?.id}`);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const exportProfile = (data: UserProfile) => {
-    const def: TDocumentDefinitions = {
-      content: [
-        { text: 'Informações de usuário', style: 'header' },
-        { text: `ID: ${data.id}` },
-        { text: `Name: ${data.full_name}` },
-        { text: `Email: ${data.email}` },
-        { text: `Created At: ${data.created_at}` },
-        { text: 'Contatos', style: 'subheader' },
-        data.contacts?.map((contact) => [
-          { text: `ID: ${contact.id}` },
-          { text: `Full Name: ${contact.full_name}` },
-          { text: `Email: ${contact.email}` },
-          { text: `Cellphone: ${contact.cellphone}` },
-          { text: `Created At: ${contact.created_at}` },
-          { text: '' },
-        ]),
-      ],
-      styles: {
-        header: {
-          fontSize: 20,
-          bold: true,
-          margin: [0, 0, 0, 10],
-        },
-        subheader: {
-          fontSize: 18,
-          bold: true,
-          margin: [0, 10, 0, 5],
-        },
-      },
-    };
-    pdfMake.createPdf(def).download('export_profile.pdf');
-  };
-
-  const values = {
-    getProfile,
-    registerUser,
-    updateUser,
-    deleteUser,
-    isOpenModal,
-    setIsOpenModal,
-    profile,
-    exportProfile,
-    deleteProfileModal,
-    setDeleteProfileModal,
-  };
+  const values: IUserContextValues = useMemo(() => ({ profile, userService }), [profile, userService]);
   return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
 };
