@@ -1,97 +1,63 @@
-import { createContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useCallback, useMemo, useState } from 'react';
+import { Endpoints } from 'src/enums';
+import { useRequest } from 'src/hooks/useRequest';
+import { IContact } from 'src/interfaces';
+import { TContactPayload } from 'src/schemas';
+import { IProviderProps } from './interface.provider.global';
 
-import { Contact, ContactData } from '../interfaces/global.interfaces';
-import { TContactPayload } from '../schemas';
-import api from '../services/axios';
-
-interface ContactContextValues {
-  contacts: Contact[];
-  isOpenModal: boolean;
-  setIsOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  deleteContactModal: boolean;
-  setDeleteContactModal: React.Dispatch<React.SetStateAction<boolean>>;
-  addContactModal: boolean;
-  setAddContactModal: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedContact: ContactData;
-  setSelectedContact: React.Dispatch<React.SetStateAction<ContactData>>;
-  addContact: (contactDataPayload: TContactPayload) => Promise<void>;
-  updateContact: (data: TContactPayload) => Promise<void>;
-  deleteContact: () => Promise<void>;
+interface IContactService {
+  create(data: TContactPayload): Promise<void>;
+  read(): Promise<void>;
+  update(data: TContactPayload): Promise<void>;
+  destroy(): Promise<void>;
 }
 
-export interface ContactsProviderChildren {
-  children: React.ReactNode;
+interface IContactContextValues {
+  contactService: IContactService;
+  contacts: IContact[];
+  createModalStates: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  highlightedStates: [IContact | undefined, React.Dispatch<React.SetStateAction<IContact | undefined>>];
 }
 
-export const ContactContext = createContext({} as ContactContextValues);
+export const ContactContext = createContext({} as IContactContextValues);
 
-export const ContactsProvider = ({ children }: ContactsProviderChildren) => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [addContactModal, setAddContactModal] = useState<boolean>(false);
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
-  const [deleteContactModal, setDeleteContactModal] = useState<boolean>(false);
-  const [selectedContact, setSelectedContact] = useState<ContactData>({} as ContactData);
-  const navigate = useNavigate();
-  const token: string | null = localStorage.getItem('@fullstack-challenge:token');
+export const ContactsProvider = ({ children }: IProviderProps) => {
+  const [highlightedContact, setHighlightedContact] = useState<IContact>();
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const { request: createContact } = useRequest<IContact, TContactPayload>();
+  const { request: retrieveAll, response: retResponse } = useRequest<IContact[]>(true);
+  const { request: updateContact } = useRequest<IContact, Partial<TContactPayload>>();
+  const { request: destroyContact } = useRequest();
+  const { data: contacts } = retResponse;
 
-  useEffect(() => {
-    (async () => {
-      api.defaults.headers.common.Authorization = `Bearer ${token}`;
-      const response = await api.get<Contact[]>('contacts/');
-      setContacts(response.data);
-    })();
-  }, [navigate, token]);
+  const read = useCallback(async () => await retrieveAll({ url: Endpoints.Contact }), [retrieveAll]);
 
-  const addContact = async (contactDataPayload: TContactPayload): Promise<void> => {
-    try {
-      const { data, status } = await api.post<Contact>(`contacts/`, contactDataPayload);
-      if (status === 201) {
-        setAddContactModal(false);
-        setContacts([...contacts, data]);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const create = useCallback(
+    async (data: TContactPayload) => await createContact({ method: 'POST', url: Endpoints.Contact, data }).then(read),
+    [createContact, read],
+  );
 
-  const updateContact = async (contactDataPayload: TContactPayload): Promise<void> => {
-    try {
-      const { data, status } = await api.patch<Contact>(`contacts/${selectedContact.id}`, contactDataPayload);
-      if (status === 200) {
-        setIsOpenModal(false);
-        setContacts((prev) => prev.map((cont) => (cont.id === data.id ? data : cont)));
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const update = useCallback(
+    async (data: Partial<TContactPayload>) =>
+      await updateContact({ method: 'PATCH', url: `${Endpoints.Contact}/${highlightedContact?.id}`, data }).then(read),
+    [read, updateContact, highlightedContact],
+  );
 
-  const deleteContact = async (): Promise<void> => {
-    try {
-      const { status } = await api.delete(`contacts/${selectedContact.id}`);
-      if (status === 204) {
-        setDeleteContactModal(false);
-        setContacts((prev) => prev.filter((cont) => cont.id !== selectedContact.id));
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const destroy = useCallback(
+    async () => await destroyContact({ method: 'DELETE', url: `${Endpoints.Contact}/${highlightedContact?.id}` }).then(read),
+    [destroyContact, read, highlightedContact],
+  );
 
-  const values = {
-    contacts,
-    isOpenModal,
-    setIsOpenModal,
-    selectedContact,
-    setSelectedContact,
-    addContact,
-    updateContact,
-    deleteContact,
-    deleteContactModal,
-    setDeleteContactModal,
-    addContactModal,
-    setAddContactModal,
-  };
+  const contactService: IContactService = useMemo(() => ({ create, read, update, destroy }), [create, read, update, destroy]);
+
+  const values: IContactContextValues = useMemo(
+    () => ({
+      createModalStates: [openCreateModal, setOpenCreateModal],
+      contacts: contacts ?? [],
+      contactService,
+      highlightedStates: [highlightedContact, setHighlightedContact],
+    }),
+    [contacts, contactService, highlightedContact, openCreateModal],
+  );
   return <ContactContext.Provider value={values}>{children}</ContactContext.Provider>;
 };

@@ -1,21 +1,86 @@
-@tailwind base; @tailwind components; @tailwind utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-body {
-  background-color: #121214;
-  color: #F1F3F5
+@layer base {
+  * {
+    @apply box-border scrollbar-thin scrollbar-track-grey-50 scrollbar-thumb-grey-200 scrollbar-track-rounded-lg scrollbar-thumb-rounded-lg hover:scrollbar-thumb-grey-300;
+  }
+
+  *:not(dialog) {
+    @apply m-0 p-0;
+  }
+
+  body {
+    @apply bg-grey-50 text-grey-900;
+  }
 }
 
 @layer components {
-  .form {
-    @apply relative transition-all duration-300 ease-in-out flex flex-col items-center justify-center shadow-md bg-gray-900 rounded-lg px-[22px] py-[42px] gap-[24px]
+  .text-28-600 {
+    @apply text-[1.75rem] font-semibold;
   }
-  .container {
-    @apply w-[300px] md:w-[600px] lg:w-[720px]
+  .text-24-600 {
+    @apply text-[1.25rem] font-semibold;
   }
-  .desk-container {
-    @apply md:w-[600px] lg:w-[720px]
+  .text-20-600 {
+    @apply text-xl font-semibold;
   }
-  .icon-button {
-    @apply w-fit p-2 rounded-md cursor-pointer transition-colors duration-500 hover:scale-110 hover:bg-pink-500
+  .text-18-600 {
+    @apply text-lg font-semibold;
+  }
+  .text-14-700 {
+    @apply text-sm font-bold;
+  }
+  .text-14-400 {
+    @apply text-sm font-normal;
+  }
+  .text-12-700 {
+    @apply text-xs font-bold;
+  }
+  .text-12-500 {
+    @apply text-xs font-medium;
+  }
+  .text-11-500 {
+    @apply text-[0.685rem] font-medium;
+  }
+  .text-10-700 {
+    @apply text-[0.625rem] font-bold;
+  }
+  .text-10-400 {
+    @apply text-[0.625rem] font-normal;
+  }
+  .text-8-500 {
+    @apply text-[0.5rem] font-medium;
+  }
+  .tw-user-forms {
+    @apply flex w-full max-w-[295px] flex-col gap-[25px] md:max-w-[400px];
+  }
+  .tw-user-forms__header {
+    @apply w-full pb-[5px] text-center;
+  }
+  .tw-user-forms__title {
+    @apply text-28-600 text-grey-600;
+  }
+  .tw-user-forms__tips {
+    @apply text-14-400 text-grey-400;
+  }
+  .tw-user-forms__redirect {
+    @apply text-14-700 text-brand-100;
+  }
+  .tw-aside-options {
+    @apply flex cursor-pointer items-center gap-[8px] underline;
+  }
+  .tw-authenticated-main-child {
+    @apply gap-[32px] rounded-[16px] bg-grey-100 p-[16px] shadow-lg shadow-brand-100;
+  }
+  .new-input {
+    @apply rounded-3xl border border-solid border-grey-100 bg-grey-50 px-[30px] py-[15px] text-grey-700 placeholder-grey-300 outline-none focus:border-grey-300;
+  }
+  .text-brand-gradient {
+    @apply bg-gradient-to-r from-brand-100 to-brand-300;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }

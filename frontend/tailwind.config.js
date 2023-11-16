@@ -4,27 +4,36 @@ export default {
   theme: {
     extend: {
       colors: {
-        white: '#ffffff',
-        'gray-50': '#f1f3f5',
-        'gray-100': '#edf2f7',
-        'gray-200': '#e2e8f0',
-        'gray-300': '#cbd5e0',
-        'gray-400': '#a0aec0',
-        'gray-500': '#718096',
-        'gray-600': '#4a5568',
-        'gray-700': '#2d3748',
-        'gray-900': '#212529',
-        'gray-950': '#121214',
         black: '#000000',
+        white: '#ffffff',
+        grey: {
+          50: '#f5f5f5',
+          100: '#e0e0e0',
+          200: '#c0c0c0',
+          300: '#a0a0a0',
+          400: '#808080',
+          500: '#606060',
+          600: '#404040',
+          700: '#303030',
+          800: '#202020',
+          900: '#101010',
+        },
+        brand: {
+          neutral: '#7F7767',
+          100: '#9AB4A6',
+          200: '#73A695',
+          300: '#204943',
+        },
+        input: { alert: '#FF3D00' },
       },
       fontFamily: {
-        sans: ['Ubuntu', 'sans-serif'],
+        sans: ['Red Hat Display', 'sans-serif'],
       },
       cursor: {
         pointer: 'pointer',
       },
     },
   },
-  variants: { scrollbar: ['rounded'] },
-  plugins: [],
+  // eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
+  plugins: [require('tailwind-scrollbar')({ nocompatible: true })],
 };
