@@ -18,7 +18,6 @@ export class CreateUserDto {
   phone: string;
 
   @IsString()
-  @IsNotEmpty()
   @MinLength(5)
   @Transform(({ value }: IValue) => hashSync(value), { groups: ['transform'] })
   password: string;

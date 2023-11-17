@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { compare } from 'bcryptjs';
 import { UserRole } from 'src/enums';
 import { ITokenUser } from 'src/interfaces';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,8 +11,22 @@ import { UsersRepository } from './repositories/users.repository';
 export class UsersService {
   constructor(private usersRepo: UsersRepository) {}
 
+  private async checkCurrentPassword(current: string, email: string) {
+    const { password: hash }: User = await this.usersRepo.findUniqueByEmail(email);
+    const match = await compare(current, hash);
+
+    if (!match) throw new BadRequestException('Incorrect current password. Please check and try again.');
+  }
+
   private checkPermission(user: ITokenUser, user_id: string) {
     if (user.id !== user_id && user.role !== UserRole.Admin) throw new ForbiddenException('Insufficient Permission');
+  }
+
+  private async checkValidUser(id: string) {
+    const user: User = await this.usersRepo.findUnique(id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+
+    return user;
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -47,20 +62,21 @@ export class UsersService {
     return await this.usersRepo.profile(id);
   }
 
-  async update(tokenUser: ITokenUser, id: string, updateUserDto: UpdateUserDto) {
-    const user: User = await this.usersRepo.findUnique(id);
-    if (!user) throw new NotFoundException(`User #${id} not found`);
-
+  async update(tokenUser: ITokenUser, id: string, { current, ...data }: UpdateUserDto) {
     this.checkPermission(tokenUser, id);
+    const { email } = await this.checkValidUser(id);
 
-    return await this.usersRepo.update(id, updateUserDto);
+    if (data.password) await this.checkCurrentPassword(current, email);
+
+    return await this.usersRepo.update(id, data);
   }
 
   async remove(tokenUser: ITokenUser, id: string) {
+    this.checkPermission(tokenUser, id);
+    await this.checkValidUser(id);
+
     const user: User = await this.usersRepo.findUnique(id);
     if (!user) throw new NotFoundException(`User #${id} not found`);
-
-    this.checkPermission(tokenUser, id);
 
     return await this.usersRepo.remove(id);
   }
