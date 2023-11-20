@@ -14,12 +14,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IReqWithUser } from 'src/interfaces';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -30,6 +32,7 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -37,6 +40,7 @@ export class UsersController {
     return this.usersService.findMany(req.user.role);
   }
 
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -44,6 +48,7 @@ export class UsersController {
     return this.usersService.profile(id);
   }
 
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -51,6 +56,7 @@ export class UsersController {
     return this.usersService.findUnique(user, id);
   }
 
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
@@ -58,6 +64,7 @@ export class UsersController {
     return this.usersService.update(user, id, updateUserDto);
   }
 
+  @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
