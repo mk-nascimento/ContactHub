@@ -1,10 +1,10 @@
-FROM node:lts-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
 COPY package.json /app/
 
-RUN npm install -g pnpm@8.7.4 @nestjs/cli && pnpm install
+RUN npm install -g pnpm@8.10.0 @nestjs/cli && pnpm install
 
 COPY . /app/
 

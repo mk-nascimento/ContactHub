@@ -1,10 +1,9 @@
 {
-  "name": "fullstack-challenge__backend",
-  "version": "2.1.1",
-  "description": "",
+  "name": "contacthub-server",
+  "version": "2.5.0",
   "author": "Maksuel Nascimento <mk-nascimento@hotmail.com>",
-  "private": true,
   "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -23,6 +22,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.1",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/swagger": "^7.1.16",
     "@prisma/client": "^5.2.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
