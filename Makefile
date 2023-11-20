@@ -1,10 +1,14 @@
-.PHONY: help docker-dev docker-prod start-dev start-prod
+.PHONY: help dcoker-serv server-dev server-prod client-dev
 
-include .env
+include backend/.env
+include frontend/.env
+
+PACKAGE_MANAGER := npm
 
 APP_PORT ?= 3000
+CLIENT_DIR := frontend
 SERVER_DIR := backend
-PROJECT := fullstack-challenge
+PROJECT := contacthub
 
 
 all: help
@@ -13,30 +17,35 @@ help:
 	@echo "Usage: make [command]"
 	@echo ""
 	@echo "Available commands:"
-	@echo "  help                    Show this help message"
-	@echo "  docker-dev              Run the development server"
-	@echo "  docker-prod             Run the production server"
-	@echo "  start-dev               Start the development server"
-	@echo "  start-prod              Start the production server"
+	@echo "  help            Show this help message"
+	@echo "  docker-server   Run the development server on Docker"
+	@echo "  server-dev      Run the development server"
+	@echo "  server-prod     Run the production server"
+	@echo "  client-dev      Run the development client"
 
-docker-dev:
-	@docker compose up -d
+.docker-server-build:
+	@cd $(SERVER_DIR) && docker build --no-cache -t $(PROJECT)-$(SERVER_DIR) .
 
-docker-prod:
-	@docker build -t $(PROJECT):prod -f backend/Dockerfile backend/
-	@docker run -d --name $(PROJECT) -p $(APP_PORT):$(APP_PORT) --env-file .env $(PROJECT):prod
+docker-server: .docker-server-build
+	@docker run -it --rm --name $(SERVER_DIR) $(PROJECT)-$(SERVER_DIR)
 
-.install:
-	@cd $(SERVER_DIR) && npm install
+.server-install:
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) install
 
-.prisma-deploy: .install
-	@cd $(SERVER_DIR) && npm run prisma:prod
+.prisma-prod: .server-install
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) run prisma:prod
 
-.prisma-dev: .install
-	@cd $(SERVER_DIR) && npm run prisma:dev
+.prisma-dev: .server-install
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) run prisma:dev
 
-start-dev: .prisma-dev
-	@cd $(SERVER_DIR) && npm run start:dev
+server-dev: .prisma-dev
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) run start:dev
 
-start-prod: .prisma-deploy
-	@cd $(SERVER_DIR) && npm run start:prod
+server-prod: .prisma-prod
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) run start:prod
+
+.client-install:
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) install
+
+client-dev: .client-install
+	@cd $(SERVER_DIR) && $(PACKAGE_MANAGER) run dev

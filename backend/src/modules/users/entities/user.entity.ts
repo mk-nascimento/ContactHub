@@ -1,3 +1,4 @@
+import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
 export class User {
@@ -8,6 +9,7 @@ export class User {
   phone: string;
   created_at: Date;
 
+  @ApiHideProperty()
   @Exclude()
   role: 'admin' | 'client';
 

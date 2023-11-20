@@ -1,13 +1,14 @@
 {
-  "name": "frontend",
+  "name": "contacthub-client",
+  "version": "2.5.0",
+  "author": "Maksuel Nascimento <mk-nascimento@hotmail.com>",
+  "license": "MIT",
   "private": true,
-  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "check": "prettier ./**/*.{ts,tsx,css} --arrow-parens 'always' --single-quote --check",
-    "format": "prettier ./**/*.{ts,tsx,css} --arrow-parens 'always' --single-quote --write",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "build:css": "postcss index.css -o output.css"
